@@ -141,6 +141,7 @@ public class ClientWelcome {
         lblIPAdress.setBounds(82, 260, 130, 50);
         frmWelcomePage.getContentPane().add(lblIPAdress);
 
+        //todo delete
         lblUserName = new JLabel("USERNAME: ");
         lblUserName.setFont(new Font("Georgia", Font.PLAIN, 20));
         lblUserName.setBounds(89, 322, 130, 50);

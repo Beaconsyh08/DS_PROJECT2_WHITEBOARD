@@ -90,7 +90,7 @@ public class Login {
 				}
 
 				frame.setVisible(false);
-				Board board = new Board();
+//				Board board = new Board();
 
 
 //				else {
