@@ -36,6 +36,7 @@ public class ServerMain {
         EventQueue.invokeLater(new Runnable() {
             public void run() {
                 try {
+                    DBUtils dbUtils = new DBUtils();
                     ServerMain window = new ServerMain();
                     window.frame.setVisible(true);
                 } catch (Exception e) {
