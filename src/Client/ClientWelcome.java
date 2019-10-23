@@ -180,14 +180,9 @@ public class ClientWelcome {
         btnJoin.addActionListener(e -> {
             userName = txtUserName.getText();
             UserProfile user = new UserProfile(userName, false);
-            Board boardClient = new Board(user);
+            Board boardClient = new Board(user,textFieldIPAddress, textFieldPort, txtSystemMessage);
             System.out.println("user_name:" + userName);
-            try {
-                boardClient.setPort(textFieldIPAddress, textFieldPort);
-            } catch (InvalidPortNumberException | UnknownHostException ex) {
-                txtSystemMessage.setText(ex.getMessage());
-                txtSystemMessage.setForeground(Color.RED);
-            }
+
             try {
                 if (boardClient.socket.isConnected()) {
                     System.out.println("True");
@@ -212,14 +207,9 @@ public class ClientWelcome {
         btnCreate.addActionListener(e -> {
             userName = txtUserName.getText();
             UserProfile user = new UserProfile(userName, true);
-            Board boardClient = new Board(user);
+            Board boardClient = new Board(user,textFieldIPAddress, textFieldPort, txtSystemMessage);
             System.out.println("user_name:" + userName);
-            try {
-                boardClient.setPort(textFieldIPAddress, textFieldPort);
-            } catch (InvalidPortNumberException | UnknownHostException ex) {
-                txtSystemMessage.setText(ex.getMessage());
-                txtSystemMessage.setForeground(Color.RED);
-            }
+
             try {
                 if (boardClient.socket.isConnected()) {
                     System.out.println("True");

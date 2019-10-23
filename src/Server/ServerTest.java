@@ -266,7 +266,7 @@ public class ServerTest {
                         System.out.println("Message Received: " + message);
                         // Do some handling here...
                         for (ConnectionToClient clientSocket : clientList) {
-                            clientSocket.parseAndReplyChat(message);
+                            clientSocket.parseAndReplyOrigin(message);
                             System.out.println(message);
                         }
 
@@ -282,14 +282,15 @@ public class ServerTest {
                     while (true) {
                         JSONObject message = (JSONObject) drawMsg.take();
                         System.out.println("Message Received: " + message);
-                        // Do some handling here...
-//                        for (ConnectionToClient clientSocket : clientList) {
-//                            clientSocket.parseAndReplyChat(message);
-//                            System.out.println(message);
-//                        }
+
+                        // todo it send to everybody inclued the drawer, maybe improve? or just leave it
+                        for (ConnectionToClient clientSocket : clientList) {
+                            clientSocket.parseAndReplyOrigin(message);
+                            System.out.println(message);
+                        }
 
                     }
-                } catch (InterruptedException ex) {
+                } catch (InterruptedException | IOException ex) {
                     ex.printStackTrace();
                 }
             }).start();
@@ -345,23 +346,11 @@ public class ServerTest {
         }
 
 
-        public void parseAndReplyChat(JSONObject jsonObject) throws IOException {
-            String method = ((String) jsonObject.get("method_name")).trim();
-            String userName = ((String) jsonObject.get("user_name")).trim();
-            String message = ((String) jsonObject.get("chat_message")).trim();
-
-            JSONObject jsonMsg = new JSONObject();
-            jsonMsg.put("method_name", method);
-            jsonMsg.put("user_name", userName);
-            jsonMsg.put("chat_message", message);
-
-            outputToClient.writeUTF(jsonMsg.toJSONString());
+        public void parseAndReplyOrigin(JSONObject jsonObject) throws IOException {
+            outputToClient.writeUTF(jsonObject.toJSONString());
             outputToClient.flush();
         }
 
 
-//        public void sendToOne(int index, Object message)throws IndexOutOfBoundsException {
-//            clientList.get(index).write(message);
-//        }
     }
 }

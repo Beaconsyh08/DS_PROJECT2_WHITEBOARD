@@ -38,13 +38,20 @@ public class Board extends JFrame {
 
 
     //initialize
-    public Board(UserProfile user) {
+    public Board(UserProfile user, JTextField textFieldIPAddress,JTextField textFieldPort,JTextArea txtSystemMessage) {
+
         this.user = user;
         this.setSize(1000, 600);
         this.setTitle("Draw Board");
         this.setDefaultCloseOperation(3);
         this.setLocationRelativeTo(null);
 
+        try {
+            setPort(textFieldIPAddress, textFieldPort);
+        } catch (InvalidPortNumberException | UnknownHostException ex) {
+            txtSystemMessage.setText(ex.getMessage());
+            txtSystemMessage.setForeground(Color.RED);
+        }
 
         //main panel
         JPanel panel = new JPanel();
@@ -363,7 +370,7 @@ public class Board extends JFrame {
         //final
         this.setVisible(true);
         Graphics g = panel_darw.getGraphics();
-        DrawListener drawlistener = new DrawListener(g, buttongroup, buttongroup2, this, shapes);
+        DrawListener drawlistener = new DrawListener(g, buttongroup, buttongroup2, this, shapes, user.getUserName(), outputToServer);
 
         panel_darw.addMouseListener(drawlistener);
         panel_darw.addMouseMotionListener(drawlistener);
@@ -388,6 +395,7 @@ public class Board extends JFrame {
             socket = new Socket(ipAddress, portNumber);
             chatMsg = new LinkedBlockingQueue<Object>();
             systemMsg = new LinkedBlockingQueue<Object>();
+            drawMsg = new LinkedBlockingQueue<Object>();
             server = new ConnectionToServer(socket);
             inputFromServer = new DataInputStream(socket.getInputStream());
             outputToServer = new DataOutputStream(socket.getOutputStream());
@@ -418,6 +426,7 @@ public class Board extends JFrame {
                 while (true) {
                     try {
                         JSONObject message = (JSONObject) drawMsg.take();
+                        System.out.println("draw take succ?");
                         System.out.println("Message Received From Server: " + message);
                         // todo add handling process
                     } catch (InterruptedException e) {
@@ -425,6 +434,8 @@ public class Board extends JFrame {
                 }
             }
         };
+        drawHandling.setDaemon(true);
+        drawHandling.start();
     }
 
     // Set the port and initialize the client, almost same as the one in DictServer Class
@@ -477,15 +488,6 @@ public class Board extends JFrame {
         chatWindowArea.append("\n");
     }
 
-    // todo unsuccessful draw msg
-//    private void sendDrawMsg(JSONObject jsonDraw)
-//            throws IOException, ParseException {
-//        // Send message to Server
-//        System.out.println("draw" + jsonDraw.toJSONString());
-//        outputToServer.writeUTF(jsonDraw.toJSONString());
-//        outputToServer.flush();
-//    }
-
     private class ConnectionToServer {
         private Socket socket;
 
@@ -502,6 +504,7 @@ public class Board extends JFrame {
                             if (inputFromServer.available() > 0) {
                                 JSONObject jsonObject = (JSONObject) jsonParser.parse(inputFromServer.readUTF());
                                 String method = ((String) jsonObject.get("method_name")).trim().toLowerCase();
+                                System.out.println("raw json" + jsonObject);
                                 switch (method) {
                                     case "message":
                                         chatMsg.put(jsonObject);
@@ -510,7 +513,9 @@ public class Board extends JFrame {
                                         systemMsg.put(jsonObject);
                                         break;
                                     case "draw":
+                                        System.out.println("receive raw succ");
                                         drawMsg.put(jsonObject);
+                                        System.out.println("put succ?" + drawMsg);
                                         break;
                                 }
                             }
