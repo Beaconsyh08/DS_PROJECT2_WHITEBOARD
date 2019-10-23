@@ -467,7 +467,7 @@ public class Board extends JFrame {
                                 }
                             }
                         };
-                        //todo repaint 是这么用的
+                        //todo repaint 在这里调
                         panel_darw.repaint();
 //                        try {
 //                            JSONObject message = (JSONObject) drawMsg.take();
