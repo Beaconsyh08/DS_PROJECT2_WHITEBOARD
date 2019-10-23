@@ -34,6 +34,7 @@ public class ClientWelcome {
      */
     public ClientWelcome() {
         initialize();
+        frmWelcomePage.setVisible(true);
     }
 
     /**
@@ -43,7 +44,6 @@ public class ClientWelcome {
         EventQueue.invokeLater(() -> {
             try {
                 ClientWelcome window = new ClientWelcome();
-                window.frmWelcomePage.setVisible(true);
             } catch (Exception e) {
                 e.printStackTrace();
             }

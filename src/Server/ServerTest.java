@@ -15,6 +15,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -33,6 +34,8 @@ public class ServerTest {
     private LinkedBlockingQueue<Object> chatMsg;
     private LinkedBlockingQueue<Object> systemMsg;
     private LinkedBlockingQueue<Object> drawMsg;
+    private static DBUtils dbUtils;
+    private static int logInStatus;
 
     /**
      * Create the application.
@@ -48,6 +51,7 @@ public class ServerTest {
         EventQueue.invokeLater(new Runnable() {
             public void run() {
                 try {
+                    dbUtils = new DBUtils();
                     ServerTest window = new ServerTest();
                     window.frame.setVisible(true);
                 } catch (Exception e) {
@@ -258,6 +262,26 @@ public class ServerTest {
                 }
             }).start();
 
+            //todo 只给来的人发
+            // login thread
+            new Thread(() -> {
+                try {
+                    while (true) {
+                        JSONObject message = new JSONObject();
+                        message.put("status", logInStatus);
+                        System.out.println("Message Received: " + message);
+
+                        for (ConnectionToClient clientSocket : clientList) {
+                            clientSocket.parseAndReplyOrigin(message);
+                            System.out.println(message);
+                        }
+
+                    }
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }).start();
+
             // chat message thread
             new Thread(() -> {
                 try {
@@ -321,6 +345,11 @@ public class ServerTest {
                                 System.out.println("Raw Received: " + jsonObject);
 
                                 switch (method) {
+                                    case "login":
+                                        LoginProcessor loginProcessor = new LoginProcessor();
+                                        logInStatus = loginProcessor.checkLoginProcessor(jsonObject, dbUtils);
+                                        System.out.println(jsonObject.toJSONString());
+                                        break;
                                     case "message":
                                         chatMsg.put(jsonObject);
                                         break;
@@ -334,7 +363,7 @@ public class ServerTest {
                                 }
 
                             }
-                        } catch (IOException | InterruptedException | ParseException e) {
+                        } catch (IOException | InterruptedException | ParseException | SQLException e) {
                             e.printStackTrace();
                         }
                     }

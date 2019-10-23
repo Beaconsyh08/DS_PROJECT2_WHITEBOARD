@@ -1,6 +1,8 @@
 //chenliu 1041291
 package Client;
 
+import org.json.simple.JSONObject;
+
 import java.awt.EventQueue;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -13,12 +15,18 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 public class Login {
 
 	private JFrame frame;
 	private JTextField userArea;
 	private JPasswordField passArea;
+	private static String ipAddress = "127.0.0.1";
+	private static int port = 8888;
 
 	/**
 	 * Launch the application.
@@ -77,10 +85,6 @@ public class Login {
 			public void mouseClicked(MouseEvent e) {
 				String username = userArea.getText();
 				String password = String.valueOf(passArea.getPassword());
-				String request = "login%"+username+"%"+password;
-//				String[] response = {};
-
-
 				//check test area
 				if(username.equals("")) {
 					JOptionPane.showMessageDialog(null,"Fail: no username entered.");
@@ -88,7 +92,22 @@ public class Login {
 				}else if(password.equals("")) {
 					JOptionPane.showMessageDialog(null,"Fail: no passowrd entered.");
 				}
+				try{
+					Socket socket = new Socket(ipAddress, port);
+					DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
 
+					JSONObject loginInfo = new JSONObject();
+					//todo 盐加密
+					loginInfo.put("username", username);
+					loginInfo.put("password", password);
+					loginInfo.put("method_name", "login");
+					dataOutputStream.writeUTF(loginInfo.toJSONString());
+					dataOutputStream.flush();
+				} catch (UnknownHostException x){
+					x.printStackTrace();
+				} catch (IOException y) {
+					y.printStackTrace();
+				}
 				frame.setVisible(false);
 //				Board board = new Board();
 

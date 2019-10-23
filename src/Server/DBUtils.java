@@ -22,7 +22,8 @@ public class DBUtils {
             //todo
         }
     }
-    public static Connection getConnection() {
+
+    public Connection getConnection() {
         return connection;
     }
 }
