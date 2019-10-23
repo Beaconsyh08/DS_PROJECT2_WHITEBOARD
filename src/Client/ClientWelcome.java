@@ -15,6 +15,7 @@ import java.net.UnknownHostException;
  * @version 1.5
  */
 public class ClientWelcome {
+    private String userName;
     private JFrame frmWelcomePage;
     private JTextField textFieldPort;
     private JLabel lblNewLabel;
@@ -24,9 +25,11 @@ public class ClientWelcome {
     private JLabel lblUserName;
     private JTextField txtUserName;
     private JButton btnCreate;
+//    private String userName;
 
     /**
      * Create the application.
+     *
      * @wbp.parser.entryPoint
      */
     public ClientWelcome() {
@@ -115,33 +118,6 @@ public class ClientWelcome {
         frmWelcomePage.getContentPane().add(textFieldIPAddress);
         textFieldIPAddress.setColumns(10);
 
-        // CONNECT BUTTON: connect to the server and go to next window if connected
-        JButton btnJoin = new JButton("Join");
-        btnJoin.setToolTipText("Join an existing white board");
-        btnJoin.addActionListener(e -> {
-            Board boardClient = new Board();
-            try {
-                boardClient.setPort(textFieldIPAddress, textFieldPort);
-            } catch (InvalidPortNumberException | UnknownHostException ex) {
-                txtSystemMessage.setText(ex.getMessage());
-                txtSystemMessage.setForeground(Color.RED);
-            }
-            try {
-                if (boardClient.socket.isConnected()) {
-                    System.out.println("True");
-                    boardClient.setVisible(true);
-                    frmWelcomePage.setVisible(false);
-                }
-            } catch (NullPointerException ex) {
-                txtSystemMessage.setText("Make sure server is on!" + "\n" + "Make sure correct port and IP Address are entered! ");
-                txtSystemMessage.setForeground(Color.RED);
-            }
-        });
-        btnJoin.setBackground(new Color(51, 255, 0));
-        btnJoin.setFont(new Font("Georgia", Font.PLAIN, 20));
-        btnJoin.setBounds(146, 393, 150, 50);
-        frmWelcomePage.getContentPane().add(btnJoin);
-
         lblNewLabel = new JLabel("Welcome to the Shared Whiteboard");
         lblNewLabel.setForeground(new Color(0, 0, 102));
         lblNewLabel.setFont(new Font("Dialog", Font.PLAIN, 26));
@@ -190,11 +166,42 @@ public class ClientWelcome {
                 }
             }
         });
+
         txtUserName.setHorizontalAlignment(SwingConstants.CENTER);
         txtUserName.setFont(new Font("Georgia", Font.PLAIN, 20));
         txtUserName.setColumns(10);
         txtUserName.setBounds(228, 327, 389, 40);
         frmWelcomePage.getContentPane().add(txtUserName);
+
+        // CONNECT BUTTON: connect to the server and go to next window if connected
+        JButton btnJoin = new JButton("Join");
+        btnJoin.setToolTipText("Join an existing white board");
+        btnJoin.addActionListener(e -> {
+            userName = txtUserName.getText();
+            UserProfile user = new UserProfile(userName, false);
+            Board boardClient = new Board(user);
+            System.out.println("user_name:" + userName);
+            try {
+                boardClient.setPort(textFieldIPAddress, textFieldPort);
+            } catch (InvalidPortNumberException | UnknownHostException ex) {
+                txtSystemMessage.setText(ex.getMessage());
+                txtSystemMessage.setForeground(Color.RED);
+            }
+            try {
+                if (boardClient.socket.isConnected()) {
+                    System.out.println("True");
+                    boardClient.setVisible(true);
+                    frmWelcomePage.setVisible(false);
+                }
+            } catch (NullPointerException ex) {
+                txtSystemMessage.setText("Make sure server is on!" + "\n" + "Make sure correct port and IP Address are entered! ");
+                txtSystemMessage.setForeground(Color.RED);
+            }
+        });
+        btnJoin.setBackground(new Color(51, 255, 0));
+        btnJoin.setFont(new Font("Georgia", Font.PLAIN, 20));
+        btnJoin.setBounds(146, 393, 150, 50);
+        frmWelcomePage.getContentPane().add(btnJoin);
 
         btnCreate = new JButton("Create");
         btnCreate.setToolTipText("Create a new white board");
@@ -202,7 +209,10 @@ public class ClientWelcome {
         btnCreate.setBackground(new Color(51, 255, 0));
         btnCreate.setBounds(409, 393, 150, 50);
         btnCreate.addActionListener(e -> {
-            Board boardClient = new Board();
+            userName = txtUserName.getText();
+            UserProfile user = new UserProfile(userName, true);
+            Board boardClient = new Board(user);
+            System.out.println("user_name:" + userName);
             try {
                 boardClient.setPort(textFieldIPAddress, textFieldPort);
             } catch (InvalidPortNumberException | UnknownHostException ex) {
@@ -221,8 +231,13 @@ public class ClientWelcome {
             }
         });
         frmWelcomePage.getContentPane().add(btnCreate);
-
     }
+
+    // todo
+    private boolean checkEmpty() {
+        return true;
+    }
+
 }
 
 

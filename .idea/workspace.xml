@@ -1,7 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="3ab07f27-2bc8-4e68-9689-c50b50e8e7d0" name="Default Changelist" comment="" />
+    <list default="true" id="3ab07f27-2bc8-4e68-9689-c50b50e8e7d0" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Client/Board$2.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Client/Board$2.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Client/Board.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Client/Board.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Server/ServerTest$ConnectionToClient$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Server/ServerTest$ConnectionToClient$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Server/ServerTest$ConnectionToClient.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Server/ServerTest$ConnectionToClient.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Server/ServerTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Server/ServerTest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Client/Board.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/Board.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Client/DrawListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/DrawListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Client/Shape.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/Shape.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Client/UserProfile.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/UserProfile.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Server/ServerTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Server/ServerTest.java" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -15,7 +27,11 @@
       </list>
     </option>
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
   <component name="ProjectId" id="1SYysxfmWU6V5EYOFfG6Ius5aCk" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
@@ -43,8 +59,8 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Application.ServerMain">
-    <configuration name="ClientWelcome" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="Application.ClientWelcome">
+    <configuration name="ClientWelcome" type="Application" factoryName="Application" singleton="false" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="Client.ClientWelcome" />
       <module name="DS_PROJECT2_WHITEBOARD" />
       <extension name="coverage">
@@ -70,10 +86,29 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="ServerTest" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="Server.ServerTest" />
+      <module name="DS_PROJECT2_WHITEBOARD" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="Server.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="Application.ClientWelcome" />
+      <item itemvalue="Application.ServerMain" />
+      <item itemvalue="Application.ServerTest" />
+    </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Application.ServerMain" />
         <item itemvalue="Application.ClientWelcome" />
+        <item itemvalue="Application.ServerTest" />
+        <item itemvalue="Application.ServerMain" />
       </list>
     </recent_temporary>
   </component>
@@ -87,11 +122,22 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1571755033137</updated>
-      <workItem from="1571755037151" duration="585000" />
+      <workItem from="1571755037151" duration="26392000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>

@@ -16,6 +16,7 @@ import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class Board extends JFrame {
 
@@ -29,9 +30,17 @@ public class Board extends JFrame {
     private DataOutputStream outputToServer;
     private JTextArea messageArea;
     private JTextArea chatWindowArea;
+    private UserProfile user;
+    private ConnectionToServer server;
+    private LinkedBlockingQueue<Object> chatMsg;
+    private LinkedBlockingQueue<Object> systemMsg;
+    private LinkedBlockingQueue<Object> drawMsg;
+
+
 
     //initialize
-    public Board() {
+    public Board(UserProfile user) {
+        this.user = user;
         this.setSize(1000, 600);
         this.setTitle("Draw Board");
         this.setDefaultCloseOperation(3);
@@ -140,10 +149,12 @@ public class Board extends JFrame {
         lblChat.setBounds(133, 6, 34, 16);
         panelright.add(lblChat);
 
+        JScrollPane chatWindowPane = new JScrollPane();
         chatWindowArea = new JTextArea();
-        chatWindowArea.setBounds(6, 27, 198, 350);
+        chatWindowPane.setBounds(6, 27, 198, 350);
         chatWindowArea.setLineWrap(true);
-        panelright.add(chatWindowArea);
+        panelright.add(chatWindowPane);
+        chatWindowPane.setViewportView(chatWindowArea);
 
         messageArea = new JTextArea();
         messageArea.setBounds(6, 389, 198, 80);
@@ -155,7 +166,7 @@ public class Board extends JFrame {
         panelright.add(btnEnter);
         btnEnter.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                // todo
+                // todo check empty
                 String chatMessage = messageArea.getText().trim();
                 if (chatMessage.equals("") || chatMessage.equals("")) {
                     messageArea.setText("Please enter word!");
@@ -163,7 +174,7 @@ public class Board extends JFrame {
                 } else {
                     try {
                         System.out.println(chatMessage);
-                        sendAndReadJSONMsg("sendMessage", "userName_aabbcc", "chatMessage");
+                        sendChatMsg("message", user.getUserName(), chatMessage);
                     } catch (IOException | ParseException ex) {
                         ex.printStackTrace();
                     }
@@ -352,7 +363,7 @@ public class Board extends JFrame {
         //final
         this.setVisible(true);
         Graphics g = panel_darw.getGraphics();
-        DrawListener drawlistener = new DrawListener(g, buttongroup, buttongroup2, this, shapes);
+        DrawListener drawlistener = new DrawListener(g, buttongroup, buttongroup2, this, shapes, user.getUserName(), outputToServer);
         panel_darw.addMouseListener(drawlistener);
         panel_darw.addMouseMotionListener(drawlistener);
     }
@@ -371,14 +382,85 @@ public class Board extends JFrame {
 //    }
 
     private void clientInitialize(String ipAddress, int portNumber) {
+
         try {
             socket = new Socket(ipAddress, portNumber);
-            inputFromServer = new DataInputStream(socket.getInputStream());
-            outputToServer = new DataOutputStream(socket.getOutputStream());
+            chatMsg = new LinkedBlockingQueue<Object>();
+            systemMsg = new LinkedBlockingQueue<Object>();
+            server = new ConnectionToServer(socket);
+//            inputFromServer = new DataInputStream(socket.getInputStream());
+//            outputToServer = new DataOutputStream(socket.getOutputStream());
 
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {
+        }
+
+        Thread messageHandling = new Thread() {
+            public void run(){
+                while(true){
+                    try{
+                        JSONObject message = (JSONObject) chatMsg.take();
+                        System.out.println("Message Received From Server: " + message);
+                        readAndAppendChatMsg(message,chatWindowArea);
+//                        readAndAppendChatMsg(message,messageArea);
+                    }
+                    catch(InterruptedException | IOException | ParseException e){ }
+                }
+            }
+        };
+        messageHandling.setDaemon(true);
+        messageHandling.start();
+
+        Thread drawHandling = new Thread() {
+            public void run(){
+                while(true){
+                    try{
+                        JSONObject message = (JSONObject) drawMsg.take();
+                        System.out.println("Message Received From Server: " + message);
+                        // todo add handling process
+                    }
+                    catch(InterruptedException e){ }
+                }
+            }
+        };
+    }
+
+    private class ConnectionToServer {
+        private Socket socket;
+        ConnectionToServer(Socket socket) throws IOException {
+            this.socket = socket;
+            JSONParser jsonParser = new JSONParser();
+            inputFromServer = new DataInputStream(socket.getInputStream());
+            outputToServer = new DataOutputStream(socket.getOutputStream());
+
+            Thread read = new Thread(){
+                public void run(){
+                    while(true){
+                        try{
+                            if(inputFromServer.available()>0) {
+                                JSONObject jsonObject = (JSONObject) jsonParser.parse(inputFromServer.readUTF());
+                                String method = ((String) jsonObject.get("method_name")).trim().toLowerCase();
+                                switch (method) {
+                                    case "message":
+                                        chatMsg.put(jsonObject);
+                                        break;
+                                    case "system":
+                                        systemMsg.put(jsonObject);
+                                        break;
+                                    case "draw":
+                                        drawMsg.put(jsonObject);
+                                        break;
+                                }
+                            }
+                        }
+                        catch(IOException | ParseException | InterruptedException e){ e.printStackTrace(); }
+                    }
+                }
+            };
+
+            read.setDaemon(true);
+            read.start();
         }
     }
 
@@ -403,7 +485,7 @@ public class Board extends JFrame {
     }
 
     // Send the JSON object to the server and receive the feedback
-    private void sendAndReadJSONMsg(String method, String userName, String message)
+    private void sendChatMsg(String method, String userName, String message)
             throws IOException, ParseException {
         // Output and Input Stream
         JSONObject jsonWord = new JSONObject();
@@ -415,25 +497,22 @@ public class Board extends JFrame {
         System.out.println(jsonWord.toJSONString());
         outputToServer.writeUTF(jsonWord.toJSONString());
         outputToServer.flush();
-
-        // Read the feedback
-        JSONParser jsonParser = new JSONParser();
-        JSONObject jsonObject = (JSONObject) jsonParser.parse(inputFromServer.readUTF());
-
-        // Append to the text area
-        appendJSONMsg(jsonObject, chatWindowArea);
     }
 
+//    private void readChatMsg(String method)
+
+    // todo could improve the format
     // Append the result from server to the Client UI to show for user at correct place
-    private void appendJSONMsg(JSONObject jsonObject, JTextArea chatWindowArea) {
+    private void readAndAppendChatMsg(JSONObject jsonObject,JTextArea chatWindowArea) throws IOException, ParseException {
         String method = ((String) jsonObject.get("method_name")).trim().toLowerCase();
-        String senderName = ((String) jsonObject.get("user_name")).trim().toLowerCase();
+        String senderName = ((String) jsonObject.get("user_name")).trim();
         String message = ((String) jsonObject.get("chat_message")).trim();
+        System.out.println(method);
+        System.out.println(senderName);
+        System.out.println(message);
         chatWindowArea.append(senderName);
         chatWindowArea.append(": ");
         chatWindowArea.append(message);
         chatWindowArea.append("\n");
-
-
     }
 }
