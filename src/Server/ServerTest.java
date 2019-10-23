@@ -264,23 +264,23 @@ public class ServerTest {
 
             //todo 只给来的人发
             // login thread
-            new Thread(() -> {
-                try {
-                    while (true) {
-                        JSONObject message = new JSONObject();
-                        message.put("status", logInStatus);
-                        System.out.println("Message Received: " + message);
-
-                        for (ConnectionToClient clientSocket : clientList) {
-                            clientSocket.parseAndReplyOrigin(message);
-                            System.out.println(message);
-                        }
-
-                    }
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
-            }).start();
+//            new Thread(() -> {
+//                try {
+//                    while (true) {
+//                        JSONObject message = new JSONObject();
+//                        message.put("status", logInStatus);
+//                        System.out.println("Message Received: " + message);
+//
+//                        for (ConnectionToClient clientSocket : clientList) {
+//                            clientSocket.parseAndReplyOrigin(message);
+//                            System.out.println(message);
+//                        }
+//
+//                    }
+//                } catch (IOException ex) {
+//                    ex.printStackTrace();
+//                }
+//            }).start();
 
             // chat message thread
             new Thread(() -> {

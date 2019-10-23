@@ -424,17 +424,60 @@ public class Board extends JFrame {
         messageHandling.start();
 
         Thread drawHandling = new Thread() {
+            //todo 这里不是只要跑一次嘛，你确定要while true?
             public void run() {
                 while (true) {
                     if (drawMsg.size() > 0) {
-                        try {
-                            JSONObject message = (JSONObject) drawMsg.take();
-                            System.out.println("draw take succ?");
-                            System.out.println("Message Received From Server: " + message);
-                            // todo add handling process
-                            parseAndDraw(message, g);
-                        } catch (InterruptedException e) {
+                        //todo 初始化
+                        shapes = new ArrayList<>();
+                        for (int i = 0; i < drawMsg.size(); i ++){
+                            //todo 一个个获取，因该是这个方法
+                            //todo (Shape) 这么写会报错，你决定一下传jsonobject还是直接传object, 你要传JSONObject的话再写个方法把他转会shape
+                            Shape tmp = (Shape) drawMsg.peek();
+                            shapes.add(tmp);
                         }
+                        //todo 先复制过来将就用吧
+                        JPanel panel_darw = new JPanel() {
+                            //repaint
+                            public void paint(Graphics g1) {
+                                super.paint(g1);
+                                g = (Graphics2D) g1;
+                                for (int i = 0; i < shapes.size(); i++) {
+                                    System.out.println("drawing");
+                                    Shape shape = (Shape) shapes.get(i);
+
+                                    g.setColor(shape.color);
+                                    g.setStroke(new BasicStroke(shape.stroke));
+                                    int x1 = shape.x1;
+                                    int x2 = shape.x2;
+                                    int y1 = shape.y1;
+                                    int y2 = shape.y2;
+                                    if (shape.type.equals("Line")) {
+                                        g.drawLine(shape.x1, shape.y1, shape.x2, shape.y2);
+                                    } else if (shape.type.equals("Rectangle")) {
+                                        g.drawRect(Math.min(x2, x1), Math.min(y2, y1), Math.abs(x2 - x1), Math.abs(y1 - y2));
+                                    } else if (shape.type.equals("Oval")) {
+                                        g.drawOval(Math.min(x2, x1), Math.min(y2, y1), Math.abs(x2 - x1), Math.abs(y1 - y2));
+                                    } else if (shape.type.equals("Circle")) {
+                                        int r = (int) Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+                                        g.drawOval(x1, y1, r, r);
+                                    } else if (shape.type.equals("Text")) {
+                                        g.drawString(shape.text, x1, y1);
+                                    }
+                                }
+                            }
+                        };
+                        //todo repaint 是这么用的
+                        panel_darw.repaint();
+//                        try {
+//                            JSONObject message = (JSONObject) drawMsg.take();
+//                            System.out.println("draw take succ?");
+//                            System.out.println("Message Received From Server: " + message);
+//
+//                            // todo add handling process
+//                            parseAndDraw(message, g);
+//                        } catch (InterruptedException e) {
+//                        }
                     }
                 }
             }
@@ -493,37 +536,37 @@ public class Board extends JFrame {
         chatWindowArea.append("\n");
     }
 
-    private void parseAndDraw(JSONObject jsonDraw, Graphics g) {
-        Graphics2D g2d = (Graphics2D) g;
-        String type = ((String) jsonDraw.get("type")).trim();
-        String text = ((String) jsonDraw.get("text")).trim();
-        int x1 = Integer.parseInt((String) jsonDraw.get("x1"));
-        int x2 = Integer.parseInt((String) jsonDraw.get("x2"));
-        int y1 = Integer.parseInt((String) jsonDraw.get("y1"));
-        int y2 = Integer.parseInt((String) jsonDraw.get("y2"));
-        Stroke stroke = new BasicStroke(Integer.parseInt((String) jsonDraw.get("stroke")));
-        Color color = new Color(Integer.parseInt(((String) jsonDraw.get("color")).trim()));
-
-        System.out.println(Integer.parseInt(((String) jsonDraw.get("color")).trim()));
-        System.out.println(color);
-        g2d.setColor(color);
-        g2d.setStroke(stroke);
-
-        switch (type) {
-            case "Line":
-                g2d.drawLine(x1, y1, x2, y2);
-            case "Rectangle":
-                g2d.drawRect(Math.min(x2, x1), Math.min(y2, y1), Math.abs(x2 - x1), Math.abs(y1 - y2));
-            case "Oval":
-                g2d.drawOval(Math.min(x2, x1), Math.min(y2, y1), Math.abs(x2 - x1), Math.abs(y1 - y2));
-            case "Circle":
-                int r = (int) Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-                g2d.drawOval(x1, y1, r, r);
-            case "Text":
-                g2d.drawString(text, x1, y1);
-        }
-
-    }
+//    private void parseAndDraw(JSONObject jsonDraw, Graphics g) {
+//        Graphics2D g2d = (Graphics2D) g;
+//        String type = ((String) jsonDraw.get("type")).trim();
+//        String text = ((String) jsonDraw.get("text")).trim();
+//        int x1 = Integer.parseInt((String) jsonDraw.get("x1"));
+//        int x2 = Integer.parseInt((String) jsonDraw.get("x2"));
+//        int y1 = Integer.parseInt((String) jsonDraw.get("y1"));
+//        int y2 = Integer.parseInt((String) jsonDraw.get("y2"));
+//        Stroke stroke = new BasicStroke(Integer.parseInt((String) jsonDraw.get("stroke")));
+//        Color color = new Color(Integer.parseInt(((String) jsonDraw.get("color")).trim()));
+//
+//        System.out.println(Integer.parseInt(((String) jsonDraw.get("color")).trim()));
+//        System.out.println(color);
+//        g2d.setColor(color);
+//        g2d.setStroke(stroke);
+//
+//        switch (type) {
+//            case "Line":
+//                g2d.drawLine(x1, y1, x2, y2);
+//            case "Rectangle":
+//                g2d.drawRect(Math.min(x2, x1), Math.min(y2, y1), Math.abs(x2 - x1), Math.abs(y1 - y2));
+//            case "Oval":
+//                g2d.drawOval(Math.min(x2, x1), Math.min(y2, y1), Math.abs(x2 - x1), Math.abs(y1 - y2));
+//            case "Circle":
+//                int r = (int) Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+//                g2d.drawOval(x1, y1, r, r);
+//            case "Text":
+//                g2d.drawString(text, x1, y1);
+//        }
+//
+//    }
 
     private class ConnectionToServer {
         private Socket socket;
