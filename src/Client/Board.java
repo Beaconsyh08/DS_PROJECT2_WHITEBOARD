@@ -38,7 +38,7 @@ public class Board extends JFrame {
 
 
     //initialize
-    public Board(UserProfile user, JTextField textFieldIPAddress,JTextField textFieldPort,JTextArea txtSystemMessage) {
+    public Board(UserProfile user, JTextField textFieldIPAddress, JTextField textFieldPort, JTextArea txtSystemMessage) {
 
         this.user = user;
         this.setSize(1000, 600);
@@ -66,6 +66,7 @@ public class Board extends JFrame {
                 super.paint(g1);
                 Graphics2D g = (Graphics2D) g1;
                 for (int i = 0; i < shapes.size(); i++) {
+                    System.out.println("drawing");
                     Shape shape = (Shape) shapes.get(i);
 
                     g.setColor(shape.color);
@@ -429,6 +430,9 @@ public class Board extends JFrame {
                         System.out.println("draw take succ?");
                         System.out.println("Message Received From Server: " + message);
                         // todo add handling process
+                        JPanel panel_darw = new JPanel();
+                        Graphics g = panel_darw.getGraphics();
+                        parseAndDraw(message, g);
                     } catch (InterruptedException e) {
                     }
                 }
@@ -486,6 +490,38 @@ public class Board extends JFrame {
         chatWindowArea.append(": ");
         chatWindowArea.append(message);
         chatWindowArea.append("\n");
+    }
+
+    private void parseAndDraw(JSONObject jsonDraw, Graphics g) {
+        Graphics2D g2d = (Graphics2D) g;
+        String type = ((String) jsonDraw.get("type")).trim();
+        String text = ((String) jsonDraw.get("text")).trim();
+        int x1 = Integer.parseInt((String) jsonDraw.get("x1"));
+        int x2 = Integer.parseInt((String) jsonDraw.get("x2"));
+        int y1 = Integer.parseInt((String) jsonDraw.get("y1"));
+        int y2 = Integer.parseInt((String) jsonDraw.get("y2"));
+        Stroke stroke = new BasicStroke(Integer.parseInt((String) jsonDraw.get("stroke")));
+        Color color = new Color(Integer.parseInt(((String) jsonDraw.get("color")).trim()));
+
+        System.out.println(color);
+        // todo have problem
+        g2d.setColor(color);
+        g2d.setStroke(stroke);
+
+        switch (type) {
+            case "Line":
+                g2d.drawLine(x1, y1, x2, y2);
+            case "Rectangle":
+                g2d.drawRect(Math.min(x2, x1), Math.min(y2, y1), Math.abs(x2 - x1), Math.abs(y1 - y2));
+            case "Oval":
+                g2d.drawOval(Math.min(x2, x1), Math.min(y2, y1), Math.abs(x2 - x1), Math.abs(y1 - y2));
+            case "Circle":
+                int r = (int) Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+                g2d.drawOval(x1, y1, r, r);
+            case "Text":
+                g2d.drawString(text, x1, y1);
+        }
+
     }
 
     private class ConnectionToServer {

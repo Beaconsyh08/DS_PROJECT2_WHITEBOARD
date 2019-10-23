@@ -41,7 +41,6 @@ public class DrawListener implements MouseListener, MouseMotionListener {
         this.board = board1;
         this.shapes = shapes;
         this.userName = userName;
-//        this.outputToServerDraw = new DataOutputStream(socket.getOutputStream());
         this.outputToServerDraw = outputToServerDraw;
     }
 
