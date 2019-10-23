@@ -35,6 +35,7 @@ public class Board extends JFrame {
     private LinkedBlockingQueue<Object> chatMsg;
     private LinkedBlockingQueue<Object> systemMsg;
     private LinkedBlockingQueue<Object> drawMsg;
+    public Graphics2D g;
 
 
     //initialize
@@ -64,7 +65,7 @@ public class Board extends JFrame {
             //repaint
             public void paint(Graphics g1) {
                 super.paint(g1);
-                Graphics2D g = (Graphics2D) g1;
+                g = (Graphics2D) g1;
                 for (int i = 0; i < shapes.size(); i++) {
                     System.out.println("drawing");
                     Shape shape = (Shape) shapes.get(i);
@@ -425,15 +426,15 @@ public class Board extends JFrame {
         Thread drawHandling = new Thread() {
             public void run() {
                 while (true) {
-                    try {
-                        JSONObject message = (JSONObject) drawMsg.take();
-                        System.out.println("draw take succ?");
-                        System.out.println("Message Received From Server: " + message);
-                        // todo add handling process
-                        JPanel panel_darw = new JPanel();
-                        Graphics g = panel_darw.getGraphics();
-                        parseAndDraw(message, g);
-                    } catch (InterruptedException e) {
+                    if (drawMsg.size() > 0) {
+                        try {
+                            JSONObject message = (JSONObject) drawMsg.take();
+                            System.out.println("draw take succ?");
+                            System.out.println("Message Received From Server: " + message);
+                            // todo add handling process
+                            parseAndDraw(message, g);
+                        } catch (InterruptedException e) {
+                        }
                     }
                 }
             }
@@ -503,8 +504,8 @@ public class Board extends JFrame {
         Stroke stroke = new BasicStroke(Integer.parseInt((String) jsonDraw.get("stroke")));
         Color color = new Color(Integer.parseInt(((String) jsonDraw.get("color")).trim()));
 
+        System.out.println(Integer.parseInt(((String) jsonDraw.get("color")).trim()));
         System.out.println(color);
-        // todo have problem
         g2d.setColor(color);
         g2d.setStroke(stroke);
 

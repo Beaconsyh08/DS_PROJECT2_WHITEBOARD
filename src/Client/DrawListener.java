@@ -115,6 +115,7 @@ public class DrawListener implements MouseListener, MouseMotionListener {
             int r = (int) Math.sqrt(Math.pow(x1 - x0, 2) + Math.pow(y1 - y0, 2));
             g.drawOval(x0, y0, r, r);
             Shape shape = new Shape("Circle", x0, y0, x1, y1, g.getColor(), strokeint, "");
+            System.out.println("origin color???" + g.getColor());
             shapes.add(shape);
             JSONObject jsondraw = shape.toJSON(userName);
             try {
