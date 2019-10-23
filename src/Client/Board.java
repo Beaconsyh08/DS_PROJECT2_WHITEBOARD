@@ -149,10 +149,12 @@ public class Board extends JFrame {
         lblChat.setBounds(133, 6, 34, 16);
         panelright.add(lblChat);
 
+        JScrollPane chatWindowPane = new JScrollPane();
         chatWindowArea = new JTextArea();
-        chatWindowArea.setBounds(6, 27, 198, 350);
+        chatWindowPane.setBounds(6, 27, 198, 350);
         chatWindowArea.setLineWrap(true);
-        panelright.add(chatWindowArea);
+        panelright.add(chatWindowPane);
+        chatWindowPane.setViewportView(chatWindowArea);
 
         messageArea = new JTextArea();
         messageArea.setBounds(6, 389, 198, 80);
@@ -361,7 +363,7 @@ public class Board extends JFrame {
         //final
         this.setVisible(true);
         Graphics g = panel_darw.getGraphics();
-        DrawListener drawlistener = new DrawListener(g, buttongroup, buttongroup2, this, shapes);
+        DrawListener drawlistener = new DrawListener(g, buttongroup, buttongroup2, this, shapes, user.getUserName(), outputToServer);
         panel_darw.addMouseListener(drawlistener);
         panel_darw.addMouseMotionListener(drawlistener);
     }
@@ -409,6 +411,19 @@ public class Board extends JFrame {
         };
         messageHandling.setDaemon(true);
         messageHandling.start();
+
+        Thread drawHandling = new Thread() {
+            public void run(){
+                while(true){
+                    try{
+                        JSONObject message = (JSONObject) drawMsg.take();
+                        System.out.println("Message Received From Server: " + message);
+                        // todo add handling process
+                    }
+                    catch(InterruptedException e){ }
+                }
+            }
+        };
     }
 
     private class ConnectionToServer {
@@ -499,6 +514,5 @@ public class Board extends JFrame {
         chatWindowArea.append(": ");
         chatWindowArea.append(message);
         chatWindowArea.append("\n");
-        System.out.println("succe??");
     }
 }

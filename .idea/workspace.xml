@@ -2,17 +2,17 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="3ab07f27-2bc8-4e68-9689-c50b50e8e7d0" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/Client/UserProfile.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Server/ServerTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Client/Board$2.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Client/Board$2.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Client/Board.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Client/Board.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Client/ClientWelcome$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Client/ClientWelcome$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Client/ClientWelcome$2.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Client/ClientWelcome$2.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Client/ClientWelcome$3.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Client/ClientWelcome$3.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Client/ClientWelcome.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Client/ClientWelcome.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Server/ServerTest$ConnectionToClient$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Server/ServerTest$ConnectionToClient$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Server/ServerTest$ConnectionToClient.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Server/ServerTest$ConnectionToClient.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Server/ServerTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Server/ServerTest.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Client/Board.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/Board.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Client/ClientWelcome.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/ClientWelcome.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Client/DrawListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/DrawListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Client/Shape.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/Shape.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Client/UserProfile.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/UserProfile.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Server/ServerTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Server/ServerTest.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -122,7 +122,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1571755033137</updated>
-      <workItem from="1571755037151" duration="11195000" />
+      <workItem from="1571755037151" duration="26392000" />
     </task>
     <servers />
   </component>

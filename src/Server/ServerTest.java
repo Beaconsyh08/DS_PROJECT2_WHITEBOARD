@@ -239,6 +239,7 @@ public class ServerTest {
             serverSocket = new ServerSocket(PORT);
             clientList = new ArrayList<ConnectionToClient>();
             chatMsg = new LinkedBlockingQueue<Object>();
+            drawMsg = new LinkedBlockingQueue<Object>();
             systemMsg = new LinkedBlockingQueue<Object>();
             new Thread(() -> {
                 try {
@@ -274,6 +275,24 @@ public class ServerTest {
                     ex.printStackTrace();
                 }
             }).start();
+
+            // draw thread
+            new Thread(() -> {
+                try {
+                    while (true) {
+                        JSONObject message = (JSONObject) drawMsg.take();
+                        System.out.println("Message Received: " + message);
+                        // Do some handling here...
+//                        for (ConnectionToClient clientSocket : clientList) {
+//                            clientSocket.parseAndReplyChat(message);
+//                            System.out.println(message);
+//                        }
+
+                    }
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+            }).start();
         }
 
     }
@@ -297,6 +316,9 @@ public class ServerTest {
                             if (inputFromClient.available() > 0) {
                                 JSONObject jsonObject = (JSONObject) jsonParser.parse(inputFromClient.readUTF());
                                 String method = ((String) jsonObject.get("method_name")).trim().toLowerCase();
+                                System.out.println(method);
+                                System.out.println("Raw Received: " + jsonObject);
+
                                 switch (method) {
                                     case "message":
                                         chatMsg.put(jsonObject);
@@ -306,6 +328,7 @@ public class ServerTest {
                                         break;
                                     case "draw":
                                         drawMsg.put(jsonObject);
+                                        System.out.println(drawMsg);
                                         break;
                                 }
 

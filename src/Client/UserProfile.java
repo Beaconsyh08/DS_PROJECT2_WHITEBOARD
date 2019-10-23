@@ -16,7 +16,6 @@ public class UserProfile {
         this.userName = userName;
     }
 
-
     public boolean isManager() {
         return isManager;
     }
