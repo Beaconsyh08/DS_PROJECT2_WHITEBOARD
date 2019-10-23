@@ -28,21 +28,16 @@ public class DrawListener implements MouseListener, MouseMotionListener {
     public String tool;
     public String stroke;
     public int strokeint;
-    private DataOutputStream outputToServerDraw;
-    private String userName;
 
 
     //initialize
     public DrawListener(Graphics g, ButtonGroup bg, ButtonGroup bg2, Board board1,
-                        ArrayList shapes, String userName, DataOutputStream outputToServerDraw) {
+                        ArrayList shapes) {
         this.g = (Graphics2D) g;
         this.bg = bg;
         this.bg2 = bg2;
         this.board = board1;
         this.shapes = shapes;
-        this.userName = userName;
-//        this.outputToServerDraw = new DataOutputStream(socket.getOutputStream());
-        this.outputToServerDraw = outputToServerDraw;
     }
 
     //get initial initial (x,y), tool and color
@@ -79,52 +74,23 @@ public class DrawListener implements MouseListener, MouseMotionListener {
             g.drawLine(x0, y0, x1, y1);
             Shape shape = new Shape("Line", x0, y0, x1, y1, g.getColor(), strokeint, "");
             shapes.add(shape);
-            JSONObject jsondraw = shape.toJSON(userName);
-            try {
-                sendCDrawMsg(jsondraw);
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            } catch (ParseException ex) {
-                ex.printStackTrace();
-            }
 
         } else if ("Rectangle".equals(tool)) {//rectangle
             g.drawRect(Math.min(x1, x0), Math.min(y1, y0), Math.abs(x1 - x0), Math.abs(y0 - y1));
             Shape shape = new Shape("Rectangle", x0, y0, x1, y1, g.getColor(), strokeint, "");
             shapes.add(shape);
-            JSONObject jsondraw = shape.toJSON(userName);
-            try {
-                sendCDrawMsg(jsondraw);
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            } catch (ParseException ex) {
-                ex.printStackTrace();
-            }
+
         } else if ("Oval".equals(tool)) {//oval
             g.drawOval(Math.min(x1, x0), Math.min(y1, y0), Math.abs(x1 - x0), Math.abs(y0 - y1));
             Shape shape = new Shape("Oval", x0, y0, x1, y1, g.getColor(), strokeint, "");
             shapes.add(shape);
-            JSONObject jsondraw = shape.toJSON(userName);
-            try {
-                sendCDrawMsg(jsondraw);
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            } catch (ParseException ex) {
-                ex.printStackTrace();
-            }
+
         } else if (tool.equals("Circle")) {//circle
             int r = (int) Math.sqrt(Math.pow(x1 - x0, 2) + Math.pow(y1 - y0, 2));
             g.drawOval(x0, y0, r, r);
             Shape shape = new Shape("Circle", x0, y0, x1, y1, g.getColor(), strokeint, "");
             shapes.add(shape);
-            JSONObject jsondraw = shape.toJSON(userName);
-            try {
-                sendCDrawMsg(jsondraw);
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            } catch (ParseException ex) {
-                ex.printStackTrace();
-            }
+
         } else if (tool.equals("Text")) {//text
             String text;
             text = JOptionPane.showInputDialog("Please enter your text:");
@@ -132,14 +98,6 @@ public class DrawListener implements MouseListener, MouseMotionListener {
                 g.drawString(text, x0, y0);
                 Shape shape = new Shape("Text", x0, y0, x1, y1, g.getColor(), strokeint, text);//
                 shapes.add(shape);
-                JSONObject jsondraw = shape.toJSON(userName);
-                try {
-                    sendCDrawMsg(jsondraw);
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                } catch (ParseException ex) {
-                    ex.printStackTrace();
-                }
             }
         }
     }
@@ -179,13 +137,6 @@ public class DrawListener implements MouseListener, MouseMotionListener {
     public void mouseMoved(MouseEvent e) {
     }
 
-    private void sendCDrawMsg(JSONObject jsonDraw)
-            throws IOException, ParseException {
-        // Send message to Server
-        System.out.println(jsonDraw.toJSONString());
-        this.outputToServerDraw.writeUTF(jsonDraw.toJSONString());
-        this.outputToServerDraw.flush();
-    }
 }
 
 

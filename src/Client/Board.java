@@ -37,7 +37,6 @@ public class Board extends JFrame {
     private LinkedBlockingQueue<Object> drawMsg;
 
 
-
     //initialize
     public Board(UserProfile user) {
         this.user = user;
@@ -61,6 +60,7 @@ public class Board extends JFrame {
                 Graphics2D g = (Graphics2D) g1;
                 for (int i = 0; i < shapes.size(); i++) {
                     Shape shape = (Shape) shapes.get(i);
+
                     g.setColor(shape.color);
                     g.setStroke(new BasicStroke(shape.stroke));
                     int x1 = shape.x1;
@@ -363,7 +363,8 @@ public class Board extends JFrame {
         //final
         this.setVisible(true);
         Graphics g = panel_darw.getGraphics();
-        DrawListener drawlistener = new DrawListener(g, buttongroup, buttongroup2, this, shapes, user.getUserName(), outputToServer);
+        DrawListener drawlistener = new DrawListener(g, buttongroup, buttongroup2, this, shapes);
+
         panel_darw.addMouseListener(drawlistener);
         panel_darw.addMouseMotionListener(drawlistener);
     }
@@ -388,8 +389,8 @@ public class Board extends JFrame {
             chatMsg = new LinkedBlockingQueue<Object>();
             systemMsg = new LinkedBlockingQueue<Object>();
             server = new ConnectionToServer(socket);
-//            inputFromServer = new DataInputStream(socket.getInputStream());
-//            outputToServer = new DataOutputStream(socket.getOutputStream());
+            inputFromServer = new DataInputStream(socket.getInputStream());
+            outputToServer = new DataOutputStream(socket.getOutputStream());
 
         } catch (UnknownHostException e) {
             e.printStackTrace();
@@ -397,15 +398,15 @@ public class Board extends JFrame {
         }
 
         Thread messageHandling = new Thread() {
-            public void run(){
-                while(true){
-                    try{
+            public void run() {
+                while (true) {
+                    try {
                         JSONObject message = (JSONObject) chatMsg.take();
                         System.out.println("Message Received From Server: " + message);
-                        readAndAppendChatMsg(message,chatWindowArea);
+                        readAndAppendChatMsg(message, chatWindowArea);
 //                        readAndAppendChatMsg(message,messageArea);
+                    } catch (InterruptedException | IOException | ParseException e) {
                     }
-                    catch(InterruptedException | IOException | ParseException e){ }
                 }
             }
         };
@@ -413,55 +414,17 @@ public class Board extends JFrame {
         messageHandling.start();
 
         Thread drawHandling = new Thread() {
-            public void run(){
-                while(true){
-                    try{
+            public void run() {
+                while (true) {
+                    try {
                         JSONObject message = (JSONObject) drawMsg.take();
                         System.out.println("Message Received From Server: " + message);
                         // todo add handling process
+                    } catch (InterruptedException e) {
                     }
-                    catch(InterruptedException e){ }
                 }
             }
         };
-    }
-
-    private class ConnectionToServer {
-        private Socket socket;
-        ConnectionToServer(Socket socket) throws IOException {
-            this.socket = socket;
-            JSONParser jsonParser = new JSONParser();
-            inputFromServer = new DataInputStream(socket.getInputStream());
-            outputToServer = new DataOutputStream(socket.getOutputStream());
-
-            Thread read = new Thread(){
-                public void run(){
-                    while(true){
-                        try{
-                            if(inputFromServer.available()>0) {
-                                JSONObject jsonObject = (JSONObject) jsonParser.parse(inputFromServer.readUTF());
-                                String method = ((String) jsonObject.get("method_name")).trim().toLowerCase();
-                                switch (method) {
-                                    case "message":
-                                        chatMsg.put(jsonObject);
-                                        break;
-                                    case "system":
-                                        systemMsg.put(jsonObject);
-                                        break;
-                                    case "draw":
-                                        drawMsg.put(jsonObject);
-                                        break;
-                                }
-                            }
-                        }
-                        catch(IOException | ParseException | InterruptedException e){ e.printStackTrace(); }
-                    }
-                }
-            };
-
-            read.setDaemon(true);
-            read.start();
-        }
     }
 
     // Set the port and initialize the client, almost same as the one in DictServer Class
@@ -499,11 +462,9 @@ public class Board extends JFrame {
         outputToServer.flush();
     }
 
-//    private void readChatMsg(String method)
-
     // todo could improve the format
     // Append the result from server to the Client UI to show for user at correct place
-    private void readAndAppendChatMsg(JSONObject jsonObject,JTextArea chatWindowArea) throws IOException, ParseException {
+    private void readAndAppendChatMsg(JSONObject jsonObject, JTextArea chatWindowArea) throws IOException, ParseException {
         String method = ((String) jsonObject.get("method_name")).trim().toLowerCase();
         String senderName = ((String) jsonObject.get("user_name")).trim();
         String message = ((String) jsonObject.get("chat_message")).trim();
@@ -514,5 +475,54 @@ public class Board extends JFrame {
         chatWindowArea.append(": ");
         chatWindowArea.append(message);
         chatWindowArea.append("\n");
+    }
+
+    // todo unsuccessful draw msg
+//    private void sendDrawMsg(JSONObject jsonDraw)
+//            throws IOException, ParseException {
+//        // Send message to Server
+//        System.out.println("draw" + jsonDraw.toJSONString());
+//        outputToServer.writeUTF(jsonDraw.toJSONString());
+//        outputToServer.flush();
+//    }
+
+    private class ConnectionToServer {
+        private Socket socket;
+
+        ConnectionToServer(Socket socket) throws IOException {
+            this.socket = socket;
+            JSONParser jsonParser = new JSONParser();
+//            inputFromServer = new DataInputStream(socket.getInputStream());
+//            outputToServer = new DataOutputStream(socket.getOutputStream());
+
+            Thread read = new Thread() {
+                public void run() {
+                    while (true) {
+                        try {
+                            if (inputFromServer.available() > 0) {
+                                JSONObject jsonObject = (JSONObject) jsonParser.parse(inputFromServer.readUTF());
+                                String method = ((String) jsonObject.get("method_name")).trim().toLowerCase();
+                                switch (method) {
+                                    case "message":
+                                        chatMsg.put(jsonObject);
+                                        break;
+                                    case "system":
+                                        systemMsg.put(jsonObject);
+                                        break;
+                                    case "draw":
+                                        drawMsg.put(jsonObject);
+                                        break;
+                                }
+                            }
+                        } catch (IOException | ParseException | InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            };
+
+            read.setDaemon(true);
+            read.start();
+        }
     }
 }
