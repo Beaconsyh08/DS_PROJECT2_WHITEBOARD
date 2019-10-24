@@ -201,6 +201,7 @@ public class Board extends JFrame {
                         ex.printStackTrace();
                     }
                 }
+                messageArea.setText("");
             }
         });
 
@@ -219,6 +220,23 @@ public class Board extends JFrame {
         scrollUserList.setViewportView(UserList);
 
         JButton btnKickOut = new JButton("Kick Out");
+        btnKickOut.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String kickoutUser = UserList.getSelectedValue();
+                System.out.println(kickoutUser);
+                try {
+                    JSONObject kickJSON = new JSONObject();
+                    kickJSON.put("method_name", "system");
+                    kickJSON.put("user_name", user.getUserName());
+                    kickJSON.put("txt_message", "kick");
+                    kickJSON.put("kicked_user", kickoutUser);
+                    outputToServer.writeUTF(kickJSON.toJSONString());
+                    outputToServer.flush();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
         btnKickOut.setBounds(205, 481, 92, 29);
         panelright.add(btnKickOut);
 
@@ -493,6 +511,11 @@ public class Board extends JFrame {
                                     userListModel.addElement(userList.get(i));
                                 }
                                 UserList.setModel(userListModel);
+                                break;
+
+                            case "bye":
+                                System.exit(0);
+                                break;
                         }
 
 
