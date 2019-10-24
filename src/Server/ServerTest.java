@@ -380,9 +380,9 @@ public class ServerTest {
                                         break;
                                     case "system":
                                         // reg name
-                                        String txtMessage = (String) jsonObject.get("txt_message");
+                                        String txtMessage = ((String) jsonObject.get("txt_message")).trim();
                                         if (txtMessage.equals("regUserName")) {
-                                            userName = (String) jsonObject.get("user_name");
+                                            userName = ((String) jsonObject.get("user_name")).trim();
                                             System.out.println(userName);
                                             userNameArray.add(userName);
                                             System.out.println(userNameArray);

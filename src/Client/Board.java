@@ -437,7 +437,7 @@ public class Board extends JFrame {
                                 int y1 = Integer.parseInt((String) jsonDraw.get("y1"));
                                 int y2 = Integer.parseInt((String) jsonDraw.get("y2"));
 //                                Stroke stroke = new BasicStroke(Integer.parseInt((String) jsonDraw.get("stroke")));
-                                int stroke = Integer.parseInt((String) jsonDraw.get("stroke"));
+                                int stroke = Integer.parseInt(((String) jsonDraw.get("stroke")).trim());
                                 Color color = new Color(Integer.parseInt(((String) jsonDraw.get("color")).trim()));
 
                                 switch (type) {
@@ -575,7 +575,7 @@ public class Board extends JFrame {
         int y2 = Integer.parseInt((String) jsonDraw.get("y2"));
         Stroke stroke = new BasicStroke(Integer.parseInt((String) jsonDraw.get("stroke")));
         Color color = new Color(Integer.parseInt(((String) jsonDraw.get("color")).trim()));
-        int strokeInt = Integer.parseInt((String) jsonDraw.get("stroke"));
+        int strokeInt = Integer.parseInt(((String) jsonDraw.get("stroke")).trim());
 
         g2d.setColor(color);
         g2d.setStroke(stroke);
