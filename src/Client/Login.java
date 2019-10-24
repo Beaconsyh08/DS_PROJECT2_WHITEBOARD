@@ -9,12 +9,7 @@ import java.awt.EventQueue;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPasswordField;
-import javax.swing.JTextField;
+import javax.swing.*;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.io.DataInputStream;
@@ -38,36 +33,29 @@ public class Login {
      * Launch the application.
      */
     public static void main(String[] args) {
-        try {
-            Login window = new Login();
-            window.frame.setVisible(true);
-        } catch (ConnectException e) {
-            JOptionPane.showMessageDialog(null, "Fail: server not found.");
-        }
-
-//		EventQueue.invokeLater(new Runnable() {
-//			public void run() {
-//				try {
-//					Login window = new Login();
-//					window.frame.setVisible(true);
-//				} catch (Exception e) {
-//					e.printStackTrace();
-//				}
-//			}
-//		});
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					Login window = new Login();
+					window.frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
     }
 
     /**
      * Create the application.
      */
-    public Login() throws ConnectException {
+    public Login() {
         initialize();
     }
 
     /**
      * Initialize the contents of the frame.
      */
-    private void initialize() throws ConnectException {
+    private void initialize() {
         frame = new JFrame();
         frame.setBounds(100, 100, 450, 300);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -85,15 +73,10 @@ public class Login {
         try {
             socket = new Socket(ipAddress, port);
         } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "Fail: server not found.");
+            System.exit(1);
             e.printStackTrace();
         }
-
-
-        //todo
-        if (false) {
-            JOptionPane.showMessageDialog(null, "Fail: server not found.");
-        }
-
 
         JButton btnLogin = new JButton("Login");
         btnLogin.addActionListener(new ActionListener() {
@@ -108,7 +91,6 @@ public class Login {
                 //check test area
                 if (username.equals("")) {
                     JOptionPane.showMessageDialog(null, "Fail: no username entered.");
-                    //todo throw error to prevent creating new canvas;
                 } else if (password.equals("")) {
                     JOptionPane.showMessageDialog(null, "Fail: no passowrd entered.");
                 }
@@ -128,9 +110,7 @@ public class Login {
                     y.printStackTrace();
                 }
 
-                //todo handle msg receive
 
-                final boolean[] flag = {true};
                 Thread thread = new Thread() {
                     public void run() {
                         while (true) {
@@ -144,21 +124,21 @@ public class Login {
                                 System.out.println(status);
                                 if (status.equals(1L)) {
                                     JOptionPane.showMessageDialog(null, "Welcome, new account created");
-                                    ClientWelcome clientWelcome = new ClientWelcome();
+                                    ClientWelcome clientWelcome = new ClientWelcome(username);
                                     frame.setVisible(false);
                                     break;
                                 } else if (status.equals(2L)) {
                                     JOptionPane.showMessageDialog(null, "Welcome back!");
-                                    ClientWelcome clientWelcome = new ClientWelcome();
+                                    ClientWelcome clientWelcome = new ClientWelcome(username);
                                     frame.setVisible(false);
                                     break;
                                 } else if (status.equals(3L)) {
-                                    JOptionPane.showMessageDialog(null, "Oops, wrong password");
-                                    flag[0] = false;
+                                    JOptionPane.showMessageDialog(null, "Oops, wrong password. Or username already been registered.");
+                                    System.exit(1);
                                     break;
                                 } else {
                                     JOptionPane.showMessageDialog(null, "Unknown Error, please contact manager");
-                                    flag[0] = false;
+                                    System.exit(1);
                                     break;
                                 }
                             } catch (IOException | ParseException e) {
@@ -167,13 +147,8 @@ public class Login {
                         }
                     }
                 };
-                if (flag[0]) {
-                    thread.setDaemon(true);
-                    thread.start();
-                }
-
-//				Board board = new Board();
-
+                thread.setDaemon(true);
+                thread.start();
             }
         });
 

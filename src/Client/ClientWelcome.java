@@ -21,8 +21,8 @@ public class ClientWelcome {
     private JScrollPane scrollPane;
     private JTextArea txtSystemMessage;
     private JTextField textFieldIPAddress;
-    private JLabel lblUserName;
-    private JTextField txtUserName;
+//    private JLabel lblUserName;
+//    private JTextField txtUserName;
     private JButton btnCreate;
 //    private String userName;
 
@@ -31,7 +31,8 @@ public class ClientWelcome {
      *
      * @wbp.parser.entryPoint
      */
-    public ClientWelcome() {
+    public ClientWelcome(String userName) {
+        this.userName = userName;
         initialize();
         frmWelcomePage.setVisible(true);
     }
@@ -42,7 +43,7 @@ public class ClientWelcome {
     public static void main(String[] args) {
         EventQueue.invokeLater(() -> {
             try {
-                ClientWelcome window = new ClientWelcome();
+                ClientWelcome window = new ClientWelcome("hahaha");
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -141,43 +142,43 @@ public class ClientWelcome {
         frmWelcomePage.getContentPane().add(lblIPAdress);
 
         //todo delete
-        lblUserName = new JLabel("USERNAME: ");
-        lblUserName.setFont(new Font("Georgia", Font.PLAIN, 20));
-        lblUserName.setBounds(89, 322, 130, 50);
-        frmWelcomePage.getContentPane().add(lblUserName);
-
-        txtUserName = new JTextField();
-        txtUserName.setForeground(Color.GRAY);
-        txtUserName.setText("Enter A Username");
-        txtUserName.addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                if (txtUserName.getText().trim().equals("Enter A Username")) {
-                    txtUserName.setText("");
-                    txtUserName.setForeground(Color.BLACK);
-                }
-            }
-
-            @Override
-            public void focusLost(FocusEvent e) {
-                if (txtUserName.getText().trim().equals("")) {
-                    txtUserName.setText("Enter A Username");
-                    txtUserName.setForeground(Color.GRAY);
-                }
-            }
-        });
-
-        txtUserName.setHorizontalAlignment(SwingConstants.CENTER);
-        txtUserName.setFont(new Font("Georgia", Font.PLAIN, 20));
-        txtUserName.setColumns(10);
-        txtUserName.setBounds(228, 327, 389, 40);
-        frmWelcomePage.getContentPane().add(txtUserName);
+//        lblUserName = new JLabel("USERNAME: ");
+//        lblUserName.setFont(new Font("Georgia", Font.PLAIN, 20));
+//        lblUserName.setBounds(89, 322, 130, 50);
+//        frmWelcomePage.getContentPane().add(lblUserName);
+//
+//        txtUserName = new JTextField();
+//        txtUserName.setForeground(Color.GRAY);
+//        txtUserName.setText("Enter A Username");
+//        txtUserName.addFocusListener(new FocusAdapter() {
+//            @Override
+//            public void focusGained(FocusEvent e) {
+//                if (txtUserName.getText().trim().equals("Enter A Username")) {
+//                    txtUserName.setText("");
+//                    txtUserName.setForeground(Color.BLACK);
+//                }
+//            }
+//
+//            @Override
+//            public void focusLost(FocusEvent e) {
+//                if (txtUserName.getText().trim().equals("")) {
+//                    txtUserName.setText("Enter A Username");
+//                    txtUserName.setForeground(Color.GRAY);
+//                }
+//            }
+//        });
+//
+//        txtUserName.setHorizontalAlignment(SwingConstants.CENTER);
+//        txtUserName.setFont(new Font("Georgia", Font.PLAIN, 20));
+//        txtUserName.setColumns(10);
+//        txtUserName.setBounds(228, 327, 389, 40);
+//        frmWelcomePage.getContentPane().add(txtUserName);
 
         // CONNECT BUTTON: connect to the server and go to next window if connected
         JButton btnJoin = new JButton("Join");
         btnJoin.setToolTipText("Join an existing white board");
         btnJoin.addActionListener(e -> {
-            userName = txtUserName.getText().trim();
+//            userName = txtUserName.getText().trim();
             UserProfile user = new UserProfile(userName, false);
             Board boardClient = new Board(user, textFieldIPAddress, textFieldPort, txtSystemMessage);
             System.out.println("user_name:" + userName);
@@ -204,7 +205,7 @@ public class ClientWelcome {
         btnCreate.setBackground(new Color(51, 255, 0));
         btnCreate.setBounds(409, 393, 150, 50);
         btnCreate.addActionListener(e -> {
-            userName = txtUserName.getText().trim();
+//            userName = txtUserName.getText().trim();
             UserProfile user = new UserProfile(userName, true);
             Board boardClient = new Board(user, textFieldIPAddress, textFieldPort, txtSystemMessage);
             System.out.println("user_name:" + userName);

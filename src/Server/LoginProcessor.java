@@ -5,10 +5,7 @@ import org.json.simple.JSONObject;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 public class LoginProcessor {
 
@@ -21,12 +18,13 @@ public class LoginProcessor {
         Connection connection = dbUtils.getConnection();
 
         //check existence
-//        String checkExistence = "SELECT * FROM user WHERE username" + " = " +  "'" + username + "'";
-        //todo 有问题，username只能是数字
-        String checkExistence = "SELECT * FROM user WHERE user.username = '" + username + "'";
+        String checkExistence = "SELECT * FROM user WHERE username" + " = " +  "'" + username + "'";
+//        String checkExistence = "SELECT * FROM user";
+        PreparedStatement ptmp = connection.prepareStatement(checkExistence);
+        ResultSet rs1 = ptmp.executeQuery();
         System.out.println(checkExistence);
-        Statement statement1 = connection.createStatement();
-        ResultSet rs1 = statement1.executeQuery(checkExistence);
+//        Statement statement1 = connection.createStatement();
+//        ResultSet rs1 = statement1.executeQuery(checkExistence);
 
         int size = 0;
         if (rs1 != null) {
@@ -35,8 +33,8 @@ public class LoginProcessor {
         }
 
         if (size == 0) {
-            String createUser = "INSERT INTO user (userID, username, managerID, password) VALUE (NULL, "
-                    + username + ",NULL, " + password + ")";
+            String createUser = "INSERT INTO user (userID, username, managerID, password) VALUE (NULL, '"
+                    + username + "' ,NULL, '" + password + "')";
             Statement statement2 = connection.createStatement();
             statement2.execute(createUser);
             logInStatus = 1;
@@ -61,7 +59,6 @@ public class LoginProcessor {
                     outputStream.writeUTF(message.toJSONString());
                     outputStream.flush();
                     System.out.println("message send: " + message);
-                    //todo 输错一次后会传两次json
                 }
             } catch (IOException ex) {
                 ex.printStackTrace();
