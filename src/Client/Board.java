@@ -54,6 +54,12 @@ public class Board extends JFrame {
             public void windowClosing(WindowEvent we) {
                 try {
                     sendMsg("system", user.getUserName(), "exit");
+                    if (user.isManager()){
+                        for (String user: userList){
+                            // todo trytry
+                            sendKick("finish",user);
+                        }
+                    }
                     System.exit(0);
                 } catch (IOException | ParseException e) {
                     e.printStackTrace();
@@ -225,13 +231,7 @@ public class Board extends JFrame {
                 String kickoutUser = UserList.getSelectedValue();
                 System.out.println(kickoutUser);
                 try {
-                    JSONObject kickJSON = new JSONObject();
-                    kickJSON.put("method_name", "system");
-                    kickJSON.put("user_name", user.getUserName());
-                    kickJSON.put("txt_message", "kick");
-                    kickJSON.put("kicked_user", kickoutUser);
-                    outputToServer.writeUTF(kickJSON.toJSONString());
-                    outputToServer.flush();
+                    sendKick("kick",kickoutUser);
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
@@ -517,6 +517,11 @@ public class Board extends JFrame {
                                 JOptionPane.showMessageDialog(null, "You have been kicked out by the manager!");
                                 System.exit(0);
                                 break;
+
+                            case "finish":
+                                JOptionPane.showMessageDialog(null, "The manager has shut down the whiteboard!");
+                                System.exit(0);
+                                break;
                         }
 
 
@@ -593,6 +598,16 @@ public class Board extends JFrame {
 
         // Send message to Server
         outputToServer.writeUTF(jsonWord.toJSONString());
+        outputToServer.flush();
+    }
+
+    private void sendKick(String command, String kickoutUser) throws IOException {
+        JSONObject kickJSON = new JSONObject();
+        kickJSON.put("method_name", "system");
+        kickJSON.put("user_name", user.getUserName());
+        kickJSON.put("txt_message", command);
+        kickJSON.put("kicked_user", kickoutUser);
+        outputToServer.writeUTF(kickJSON.toJSONString());
         outputToServer.flush();
     }
 

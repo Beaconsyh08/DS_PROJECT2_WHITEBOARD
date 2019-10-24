@@ -350,6 +350,9 @@ public class ServerTest {
 
                             case "exit":
                                 String userNameExit = ((String) message.get("user_name")).trim();
+//                                for (ConnectionToClient clientConnection : clientList) {
+//                                    if (clientConnection.)
+//                                }
                                 userNameArray.remove(userNameExit);
                                 updateConnectionList(userNameExit);
                                 sendUpdateUserList();
@@ -371,8 +374,16 @@ public class ServerTest {
                                 updateConnectionList(userNameKick);
                                 sendUpdateUserList();
                                 break;
-                        }
 
+                            case "finish":
+                                JSONObject finishJSON = new JSONObject();
+                                finishJSON.put("method_name", "system");
+                                finishJSON.put("txt_message", "finish");
+                                for (ConnectionToClient clientConnection : clientList) {
+                                    clientConnection.parseAndReplyOrigin(finishJSON);
+                                }
+                                break;
+                        }
                     }
                 } catch (InterruptedException | IOException ex) {
                     ex.printStackTrace();
