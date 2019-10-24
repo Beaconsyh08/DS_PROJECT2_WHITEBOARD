@@ -34,6 +34,7 @@ public class Board extends JFrame {
     private LinkedBlockingQueue<Object> chatMsg;
     private LinkedBlockingQueue<Object> systemMsg;
     private LinkedBlockingQueue<Object> drawMsg;
+    private ArrayList<String> userList;
 
 
     //initialize
@@ -426,6 +427,25 @@ public class Board extends JFrame {
             e.printStackTrace();
         }
 
+        // get full canvas
+        if (!user.isManager()) {
+            try {
+                sendMsg("system", user.getUserName(), "fullCanvas");
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+
+        try {
+            sendMsg("system", user.getUserName(), "fullUserList");
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
         Thread systemHandling = new Thread() {
             public void run() {
                 while (true) {
@@ -470,6 +490,10 @@ public class Board extends JFrame {
                                         break;
                                 }
                                 break;
+
+                            case "update_user_list":
+                                userList = ((ArrayList<String>) message.get("userList"));
+                                System.out.println("updated userlist " + userList);
                         }
 
 
@@ -497,17 +521,6 @@ public class Board extends JFrame {
 
         Thread drawHandling = new Thread() {
             public void run() {
-
-                // get full canvas
-                if (!user.isManager()) {
-                    try {
-                        sendMsg("system", user.getUserName(), "fullCanvas");
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
-                }
 
                 while (true) {
                     if (drawMsg.size() > 0) {

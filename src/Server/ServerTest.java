@@ -341,12 +341,26 @@ public class ServerTest {
                                 System.out.println(userName);
                                 userNameArray.add(userName);
                                 System.out.println(userNameArray);
+                                JSONObject userListJSON = new JSONObject();
+                                userListJSON.put("method_name", "system");
+                                userListJSON.put("userList", userNameArray);
+                                userListJSON.put("txt_message", "update_user_list");
+                                for (ConnectionToClient clientConnection : clientList) {
+                                    clientConnection.parseAndReplyOrigin(userListJSON);
+                                }
                                 break;
 
                             case "exit":
                                 String userNameExit = ((String) message.get("user_name")).trim();
                                 userNameArray.remove(userNameExit);
                                 System.out.println(userNameArray);
+                                JSONObject userListJSONUP = new JSONObject();
+                                userListJSONUP.put("method_name", "system");
+                                userListJSONUP.put("userList", userNameArray);
+                                userListJSONUP.put("txt_message", "update_user_list");
+                                for (ConnectionToClient clientConnection : clientList) {
+                                    clientConnection.parseAndReplyOrigin(userListJSONUP);
+                                }
                                 break;
                         }
 
