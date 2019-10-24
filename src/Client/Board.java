@@ -59,7 +59,6 @@ public class Board extends JFrame {
         }
 
 
-
         //main panel
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
@@ -422,7 +421,7 @@ public class Board extends JFrame {
 
                         String command = ((String) message.get("txt_message")).trim();
 
-                        switch (command){
+                        switch (command) {
                             case "add_to_shapes":
                                 JSONObject jsonDraw = (JSONObject) message.get("shape");
 
@@ -436,13 +435,13 @@ public class Board extends JFrame {
                                 int stroke = Integer.parseInt((String) jsonDraw.get("stroke"));
                                 Color color = new Color(Integer.parseInt(((String) jsonDraw.get("color")).trim()));
 
-                                switch (type){
+                                switch (type) {
                                     case "Line":
                                         Shape shape = new Shape("Line", x1, y1, x2, y2, color, stroke, "");
                                         shapes.add(shape);
                                         break;
                                     case "Rectangle":
-                                        Shape shape2 = new Shape("Rectangle", x1, y1, x2, y2, color,stroke, "");
+                                        Shape shape2 = new Shape("Rectangle", x1, y1, x2, y2, color, stroke, "");
                                         shapes.add(shape2);
                                         break;
                                     case "Oval":
@@ -579,6 +578,7 @@ public class Board extends JFrame {
         int y2 = Integer.parseInt((String) jsonDraw.get("y2"));
         Stroke stroke = new BasicStroke(Integer.parseInt((String) jsonDraw.get("stroke")));
         Color color = new Color(Integer.parseInt(((String) jsonDraw.get("color")).trim()));
+        int strokeInt = Integer.parseInt((String) jsonDraw.get("stroke"));
 
         System.out.println(Integer.parseInt(((String) jsonDraw.get("color")).trim()));
         System.out.println(color);
@@ -588,19 +588,29 @@ public class Board extends JFrame {
         switch (type) {
             case "Line":
                 g2d.drawLine(x1, y1, x2, y2);
+                Shape shape = new Shape("Line", x1, y1, x2, y2, color, strokeInt, "");
+                shapes.add(shape);
                 break;
             case "Rectangle":
                 g2d.drawRect(Math.min(x2, x1), Math.min(y2, y1), Math.abs(x2 - x1), Math.abs(y1 - y2));
+                Shape shape2 = new Shape("Rectangle", x1, y1, x2, y2, color, strokeInt, "");
+                shapes.add(shape2);
                 break;
             case "Oval":
                 g2d.drawOval(Math.min(x2, x1), Math.min(y2, y1), Math.abs(x2 - x1), Math.abs(y1 - y2));
+                Shape shape3 = new Shape("Oval", x1, y1, x2, y2, color, strokeInt, "");
+                shapes.add(shape3);
                 break;
             case "Circle":
                 int r = (int) Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
                 g2d.drawOval(x1, y1, r, r);
+                Shape shape4 = new Shape("Circle", x1, y1, x2, y2, color, strokeInt, "");
+                shapes.add(shape4);
                 break;
             case "Text":
                 g2d.drawString(text, x1, y1);
+                Shape shape5 = new Shape("Text", x1, y1, x2, y2, color, strokeInt, "");
+                shapes.add(shape5);
                 break;
         }
     }
