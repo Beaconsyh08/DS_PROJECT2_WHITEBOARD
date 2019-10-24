@@ -497,7 +497,7 @@ public class Board extends JFrame {
                                         shapes.add(shape4);
                                         break;
                                     case "Text":
-                                        Shape shape5 = new Shape("Text", x1, y1, x2, y2, color, stroke, "");
+                                        Shape shape5 = new Shape("Text", x1, y1, x2, y2, color, stroke, text);
                                         shapes.add(shape5);
                                         break;
                                 }
