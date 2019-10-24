@@ -8,10 +8,7 @@ import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -37,6 +34,9 @@ public class Board extends JFrame {
     private LinkedBlockingQueue<Object> chatMsg;
     private LinkedBlockingQueue<Object> systemMsg;
     private LinkedBlockingQueue<Object> drawMsg;
+    private ArrayList<String> userList;
+    private DefaultListModel<String> userListModel = new DefaultListModel<String>();
+    private JList<String> UserList = new JList<String>();
 
 
     //initialize
@@ -50,6 +50,22 @@ public class Board extends JFrame {
 
         // set not resizable
         this.setResizable(false);
+        this.addWindowListener( new WindowAdapter() {
+            public void windowClosing(WindowEvent we) {
+                try {
+                    sendMsg("system", user.getUserName(), "exit");
+                    if (user.isManager()){
+                        for (String user: userList){
+                            // todo trytry
+                            sendKick("finish", user);
+                        }
+                    }
+                    System.exit(0);
+                } catch (IOException | ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
 
         try {
             setPort(textFieldIPAddress, textFieldPort);
@@ -72,7 +88,6 @@ public class Board extends JFrame {
                 super.paint(g1);
                 g = (Graphics2D) g1;
                 for (int i = 0; i < shapes.size(); i++) {
-                    System.out.println("drawing");
                     Shape shape = (Shape) shapes.get(i);
 
                     g.setColor(shape.color);
@@ -187,12 +202,12 @@ public class Board extends JFrame {
                     messageArea.setForeground(Color.RED);
                 } else {
                     try {
-                        System.out.println(chatMessage);
                         sendMsg("message", user.getUserName(), chatMessage);
                     } catch (IOException | ParseException ex) {
                         ex.printStackTrace();
                     }
                 }
+                messageArea.setText("");
             }
         });
 
@@ -201,24 +216,27 @@ public class Board extends JFrame {
         scrollUserList.setBounds(210, 27, 84, 442);
         panelright.add(scrollUserList);
 
-        JList<String> UserList = new JList<String>();
+
         UserList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         UserList.setFont(new Font("Lucida Grande", Font.PLAIN, 13));
-        UserList.setModel(new AbstractListModel<String>() {
-
-            String[] values = new String[]{"User1", "User2", "User3", "User4", "User5"};
-
-            public int getSize() {
-                return values.length;
-            }
-
-            public String getElementAt(int index) {
-                return values[index];
-            }
-        });
+//        for(int i = 0; i < userList.size(); i ++) {
+//            userListModel.addElement(userList.get(i));
+//        }
+//        UserList.setModel(userListModel);
         scrollUserList.setViewportView(UserList);
 
         JButton btnKickOut = new JButton("Kick Out");
+        btnKickOut.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String kickoutUser = UserList.getSelectedValue();
+                System.out.println(kickoutUser);
+                try {
+                    sendKick("kick",kickoutUser);
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
         btnKickOut.setBounds(205, 481, 92, 29);
         panelright.add(btnKickOut);
 
@@ -412,13 +430,39 @@ public class Board extends JFrame {
         } catch (IOException e) {
         }
 
+        // reg name to connection
+        try {
+            sendMsg("system", user.getUserName(), "regUserName");
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        // get full canvas
+        if (!user.isManager()) {
+            try {
+                sendMsg("system", user.getUserName(), "fullCanvas");
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+
+        try {
+            sendMsg("system", user.getUserName(), "fullUserList");
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
         Thread systemHandling = new Thread() {
             public void run() {
                 while (true) {
                     try {
                         JSONObject message = (JSONObject) systemMsg.take();
-                        System.out.println("System Message Received From Server: " + message);
-
                         String command = ((String) message.get("txt_message")).trim();
 
                         switch (command) {
@@ -432,7 +476,7 @@ public class Board extends JFrame {
                                 int y1 = Integer.parseInt((String) jsonDraw.get("y1"));
                                 int y2 = Integer.parseInt((String) jsonDraw.get("y2"));
 //                                Stroke stroke = new BasicStroke(Integer.parseInt((String) jsonDraw.get("stroke")));
-                                int stroke = Integer.parseInt((String) jsonDraw.get("stroke"));
+                                int stroke = Integer.parseInt(((String) jsonDraw.get("stroke")).trim());
                                 Color color = new Color(Integer.parseInt(((String) jsonDraw.get("color")).trim()));
 
                                 switch (type) {
@@ -453,10 +497,30 @@ public class Board extends JFrame {
                                         shapes.add(shape4);
                                         break;
                                     case "Text":
-                                        Shape shape5 = new Shape("Text", x1, y1, x2, y2, color, stroke, "");
+                                        Shape shape5 = new Shape("Text", x1, y1, x2, y2, color, stroke, text);
                                         shapes.add(shape5);
                                         break;
                                 }
+                                break;
+
+                            case "update_user_list":
+                                userList = ((ArrayList<String>) message.get("userList"));
+                                System.out.println("updated userlist " + userList);
+                                userListModel.clear();
+                                for(int i = 0; i < userList.size(); i ++) {
+                                    userListModel.addElement(userList.get(i));
+                                }
+                                UserList.setModel(userListModel);
+                                break;
+
+                            case "bye":
+                                JOptionPane.showMessageDialog(null, "You have been kicked out by the manager!");
+                                System.exit(0);
+                                break;
+
+                            case "finish":
+                                JOptionPane.showMessageDialog(null, "The manager has shut down the whiteboard!");
+                                System.exit(0);
                                 break;
                         }
 
@@ -474,9 +538,7 @@ public class Board extends JFrame {
                 while (true) {
                     try {
                         JSONObject message = (JSONObject) chatMsg.take();
-                        System.out.println("Message Received From Server: " + message);
                         readAndAppendChatMsg(message, chatWindowArea);
-//                        readAndAppendChatMsg(message,messageArea);
                     } catch (InterruptedException | IOException | ParseException e) {
                     }
                 }
@@ -487,24 +549,11 @@ public class Board extends JFrame {
 
         Thread drawHandling = new Thread() {
             public void run() {
-                // todo get full canvas
-                if (!user.isManager()) {
-                    try {
-                        sendMsg("system", user.getUserName(), "fullCanvas");
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
-                }
 
                 while (true) {
                     if (drawMsg.size() > 0) {
                         try {
                             JSONObject message = (JSONObject) drawMsg.take();
-                            System.out.println("draw take succ?");
-                            System.out.println("Message Received From Server: " + message);
-
                             // todo add handling process
                             Graphics gd = panel_darw.getGraphics();
                             parseAndDraw(message, gd);
@@ -548,8 +597,17 @@ public class Board extends JFrame {
         jsonWord.put("txt_message", message);
 
         // Send message to Server
-        System.out.println(jsonWord.toJSONString());
         outputToServer.writeUTF(jsonWord.toJSONString());
+        outputToServer.flush();
+    }
+
+    private void sendKick(String command, String kickoutUser) throws IOException {
+        JSONObject kickJSON = new JSONObject();
+        kickJSON.put("method_name", "system");
+        kickJSON.put("user_name", user.getUserName());
+        kickJSON.put("txt_message", command);
+        kickJSON.put("kicked_user", kickoutUser);
+        outputToServer.writeUTF(kickJSON.toJSONString());
         outputToServer.flush();
     }
 
@@ -559,9 +617,6 @@ public class Board extends JFrame {
         String method = ((String) jsonObject.get("method_name")).trim().toLowerCase();
         String senderName = ((String) jsonObject.get("user_name")).trim();
         String message = ((String) jsonObject.get("txt_message")).trim();
-        System.out.println(method);
-        System.out.println(senderName);
-        System.out.println(message);
         chatWindowArea.append(senderName);
         chatWindowArea.append(": ");
         chatWindowArea.append(message);
@@ -578,10 +633,8 @@ public class Board extends JFrame {
         int y2 = Integer.parseInt((String) jsonDraw.get("y2"));
         Stroke stroke = new BasicStroke(Integer.parseInt((String) jsonDraw.get("stroke")));
         Color color = new Color(Integer.parseInt(((String) jsonDraw.get("color")).trim()));
-        int strokeInt = Integer.parseInt((String) jsonDraw.get("stroke"));
+        int strokeInt = Integer.parseInt(((String) jsonDraw.get("stroke")).trim());
 
-        System.out.println(Integer.parseInt(((String) jsonDraw.get("color")).trim()));
-        System.out.println(color);
         g2d.setColor(color);
         g2d.setStroke(stroke);
 
@@ -609,7 +662,7 @@ public class Board extends JFrame {
                 break;
             case "Text":
                 g2d.drawString(text, x1, y1);
-                Shape shape5 = new Shape("Text", x1, y1, x2, y2, color, strokeInt, "");
+                Shape shape5 = new Shape("Text", x1, y1, x2, y2, color, strokeInt, text);
                 shapes.add(shape5);
                 break;
         }
@@ -621,8 +674,6 @@ public class Board extends JFrame {
         ConnectionToServer(Socket socket) throws IOException {
             this.socket = socket;
             JSONParser jsonParser = new JSONParser();
-//            inputFromServer = new DataInputStream(socket.getInputStream());
-//            outputToServer = new DataOutputStream(socket.getOutputStream());
 
             Thread read = new Thread() {
                 public void run() {
@@ -640,9 +691,7 @@ public class Board extends JFrame {
                                         systemMsg.put(jsonObject);
                                         break;
                                     case "draw":
-                                        System.out.println("receive raw succ");
                                         drawMsg.put(jsonObject);
-                                        System.out.println("put succ?" + drawMsg);
                                         break;
                                 }
                             }
@@ -652,7 +701,6 @@ public class Board extends JFrame {
                     }
                 }
             };
-
             read.setDaemon(true);
             read.start();
         }

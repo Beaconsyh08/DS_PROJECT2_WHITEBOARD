@@ -1,6 +1,5 @@
 package Server;
 
-import Client.Shape;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -16,13 +15,14 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class ServerTest {
 
+    private static DBUtils dbUtils;
+    private static int logInStatus;
     private JFrame frame;
     private JTextField txtIP;
     private JTextField txtPort;
@@ -37,6 +37,7 @@ public class ServerTest {
     private LinkedBlockingQueue<JSONObject> drawMsg;
     private static DBUtils dbUtils;
     private ArrayList<JSONObject> canvasShapes;
+    private ArrayList<String> userNameArray = new ArrayList<String>();
 
     /**
      * Create the application.
@@ -239,6 +240,7 @@ public class ServerTest {
      */
     private void serverInitialize(int PORT) throws IOException {
 
+
         {
             printInitialInfo();
             serverSocket = new ServerSocket(PORT);
@@ -251,13 +253,11 @@ public class ServerTest {
             new Thread(() -> {
                 try {
                     // Create a server socket
-//                    serverSocket = new ServerSocket(PORT);
                     while (true) {
                         // Listen for a new connection request
                         Socket clientSocket = serverSocket.accept();
-                        clientList.add(new ConnectionToClient(clientSocket));
-                        // Create and start a new thread for the connection
-//                        new Thread(new MessageHandler(clientSocket)).start();
+                        ConnectionToClient socketConnection = new ConnectionToClient(clientSocket);
+                        clientList.add(socketConnection);
                     }
                 } catch (IOException ex) {
                     ex.printStackTrace();
@@ -272,6 +272,7 @@ public class ServerTest {
 //                        System.out.println("Message Received: " + message);
                         // Do some handling here...
                         for (ConnectionToClient clientConnection : clientList) {
+                            System.out.println("clientList chat" + clientList);
                             clientConnection.parseAndReplyOrigin(message);
                         }
 
@@ -290,6 +291,7 @@ public class ServerTest {
 
                         // todo it send to everybody inclued the drawer, maybe improve? or just leave it
                         for (ConnectionToClient clientConnection : clientList) {
+                            System.out.println("clientList draw" + clientList);
                             clientConnection.parseAndReplyOrigin(message);
 //                            System.out.println(message);
                         }
@@ -306,9 +308,9 @@ public class ServerTest {
                     while (true) {
                         JSONObject message = systemMsg.take();
                         String txtMessage = ((String) message.get("txt_message")).trim();
-                        switch (txtMessage){
+                        switch (txtMessage) {
                             case "fullCanvas":
-                                for (JSONObject canvasShape: canvasShapes){
+                                for (JSONObject canvasShape : canvasShapes) {
                                     JSONObject canvasShapeJSON = new JSONObject();
                                     canvasShapeJSON.put("method_name", "system");
                                     canvasShapeJSON.put("shape", canvasShape);
@@ -318,15 +320,83 @@ public class ServerTest {
                                     }
                                 }
                                 break;
-                        }
 
+                            case "regUserName":
+                                String userName = ((String) message.get("user_name")).trim();
+                                System.out.println(userName);
+                                userNameArray.add(userName);
+                                System.out.println(userNameArray);
+                                sendUpdateUserList();
+                                break;
+
+                            case "exit":
+                                String userNameExit = ((String) message.get("user_name")).trim();
+//                                for (ConnectionToClient clientConnection : clientList) {
+//                                    if (clientConnection.)
+//                                }
+                                userNameArray.remove(userNameExit);
+                                updateConnectionList(userNameExit);
+                                sendUpdateUserList();
+                                break;
+
+                            case "kick":
+                                String userNameKick = ((String) message.get("kicked_user")).trim();
+                                // todo send kick out message to the person be kicked
+                                JSONObject kickJSON = new JSONObject();
+                                kickJSON.put("method_name", "system");
+                                kickJSON.put("txt_message", "bye");
+                                for (ConnectionToClient clientConnection : clientList) {
+                                    if (clientConnection.getUserName().equals(userNameKick)) {
+                                        clientConnection.parseAndReplyOrigin(kickJSON);
+                                        break;
+                                    }
+                                }
+                                userNameArray.remove(userNameKick);
+                                updateConnectionList(userNameKick);
+                                sendUpdateUserList();
+                                break;
+
+                            case "finish":
+                                JSONObject finishJSON = new JSONObject();
+                                finishJSON.put("method_name", "system");
+                                finishJSON.put("txt_message", "finish");
+                                for (ConnectionToClient clientConnection : clientList) {
+                                    clientConnection.parseAndReplyOrigin(finishJSON);
+                                    userNameArray.remove(clientConnection.getUserName());
+                                    updateConnectionList(clientConnection.getUserName());
+                                }
+                                break;
+                        }
                     }
                 } catch (InterruptedException | IOException ex) {
                     ex.printStackTrace();
                 }
             }).start();
         }
+    }
 
+    private void sendUpdateUserList() throws IOException {
+        JSONObject userListJSON = new JSONObject();
+        userListJSON.put("method_name", "system");
+        userListJSON.put("userList", userNameArray);
+        userListJSON.put("txt_message", "update_user_list");
+        for (ConnectionToClient clientConnection : clientList) {
+            clientConnection.parseAndReplyOrigin(userListJSON);
+        }
+    }
+
+    private void updateConnectionList(String userNameExit) {
+        ArrayList<ConnectionToClient> newClientList = new ArrayList<ConnectionToClient>();
+        for (ConnectionToClient clientConnection : clientList) {
+            if (clientConnection.getUserName().equals(userNameExit)) {
+                clientConnection.setAlive(false);
+            }
+            if (clientConnection.isAlive) {
+                newClientList.add(clientConnection);
+            }
+        }
+        clientList = newClientList;
+        System.out.println("connection after delete" + newClientList);
     }
 
 
@@ -334,6 +404,8 @@ public class ServerTest {
         private Socket socket;
         private DataInputStream inputFromClient;
         private DataOutputStream outputToClient;
+        private String userName;
+        private boolean isAlive = true;
 
         ConnectionToClient(Socket socket) throws IOException {
             this.socket = socket;
@@ -348,7 +420,7 @@ public class ServerTest {
                             if (inputFromClient.available() > 0) {
                                 JSONObject jsonObject = (JSONObject) jsonParser.parse(inputFromClient.readUTF());
                                 String method = ((String) jsonObject.get("method_name")).trim().toLowerCase();
-
+                                System.out.println("raw json" + jsonObject);
                                 switch (method) {
                                     case "login":
                                         System.out.println(jsonObject.toJSONString());
@@ -360,6 +432,10 @@ public class ServerTest {
                                         chatMsg.put(jsonObject);
                                         break;
                                     case "system":
+                                        if (((String) jsonObject.get("txt_message")).trim().equals("regUserName")) {
+                                            String userNameNew = ((String) jsonObject.get("user_name")).trim();
+                                            setUserName(userNameNew);
+                                        }
                                         systemMsg.put(jsonObject);
                                         break;
                                     case "draw":
@@ -380,6 +456,21 @@ public class ServerTest {
             read.start();
         }
 
+        public boolean isAlive() {
+            return isAlive;
+        }
+
+        public void setAlive(boolean alive) {
+            isAlive = alive;
+        }
+
+        public String getUserName() {
+            return userName;
+        }
+
+        public void setUserName(String userName) {
+            this.userName = userName;
+        }
 
         public void parseAndReplyOrigin(JSONObject jsonObject) throws IOException {
             outputToClient.writeUTF(jsonObject.toJSONString());
