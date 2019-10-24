@@ -487,7 +487,17 @@ public class Board extends JFrame {
 
         Thread drawHandling = new Thread() {
             public void run() {
-                // todo get full canvas
+
+                // reg name to connection
+                try {
+                    sendMsg("system", user.getUserName(), "regUserName");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
+                // get full canvas
                 if (!user.isManager()) {
                     try {
                         sendMsg("system", user.getUserName(), "fullCanvas");
@@ -497,6 +507,8 @@ public class Board extends JFrame {
                         e.printStackTrace();
                     }
                 }
+
+
 
                 while (true) {
                     if (drawMsg.size() > 0) {

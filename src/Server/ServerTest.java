@@ -1,6 +1,5 @@
 package Server;
 
-import Client.Shape;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -16,13 +15,14 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class ServerTest {
 
+    private static DBUtils dbUtils;
+    private static int logInStatus;
     private JFrame frame;
     private JTextField txtIP;
     private JTextField txtPort;
@@ -35,8 +35,6 @@ public class ServerTest {
     private LinkedBlockingQueue<JSONObject> chatMsg;
     private LinkedBlockingQueue<JSONObject> systemMsg;
     private LinkedBlockingQueue<JSONObject> drawMsg;
-    private static DBUtils dbUtils;
-    private static int logInStatus;
     private ArrayList<JSONObject> canvasShapes;
 
     /**
@@ -252,13 +250,10 @@ public class ServerTest {
             new Thread(() -> {
                 try {
                     // Create a server socket
-//                    serverSocket = new ServerSocket(PORT);
                     while (true) {
                         // Listen for a new connection request
                         Socket clientSocket = serverSocket.accept();
                         clientList.add(new ConnectionToClient(clientSocket));
-                        // Create and start a new thread for the connection
-//                        new Thread(new MessageHandler(clientSocket)).start();
                     }
                 } catch (IOException ex) {
                     ex.printStackTrace();
@@ -327,9 +322,9 @@ public class ServerTest {
                     while (true) {
                         JSONObject message = systemMsg.take();
                         String txtMessage = ((String) message.get("txt_message")).trim();
-                        switch (txtMessage){
+                        switch (txtMessage) {
                             case "fullCanvas":
-                                for (JSONObject canvasShape: canvasShapes){
+                                for (JSONObject canvasShape : canvasShapes) {
                                     JSONObject canvasShapeJSON = new JSONObject();
                                     canvasShapeJSON.put("method_name", "system");
                                     canvasShapeJSON.put("shape", canvasShape);
@@ -339,6 +334,8 @@ public class ServerTest {
                                     }
                                 }
                                 break;
+
+//                            case
                         }
 
                     }
@@ -355,6 +352,7 @@ public class ServerTest {
         private Socket socket;
         private DataInputStream inputFromClient;
         private DataOutputStream outputToClient;
+        private String userName;
 
         ConnectionToClient(Socket socket) throws IOException {
             this.socket = socket;
@@ -380,7 +378,14 @@ public class ServerTest {
                                         chatMsg.put(jsonObject);
                                         break;
                                     case "system":
-                                        systemMsg.put(jsonObject);
+                                        // reg name
+                                        String txtMessage = (String) jsonObject.get("txt_message");
+                                        if (txtMessage.equals("regUserName")) {
+                                            userName = (String) jsonObject.get("user_name");
+                                            System.out.println(userName);
+                                        } else {
+                                            systemMsg.put(jsonObject);
+                                        }
                                         break;
                                     case "draw":
                                         drawMsg.put(jsonObject);
@@ -400,6 +405,9 @@ public class ServerTest {
             read.start();
         }
 
+        public String getUserName() {
+            return userName;
+        }
 
         public void parseAndReplyOrigin(JSONObject jsonObject) throws IOException {
             outputToClient.writeUTF(jsonObject.toJSONString());
