@@ -36,6 +36,7 @@ public class ServerTest {
     private LinkedBlockingQueue<JSONObject> systemMsg;
     private LinkedBlockingQueue<JSONObject> drawMsg;
     private ArrayList<JSONObject> canvasShapes;
+    private ArrayList<String> userNameArray = new ArrayList<String>();
 
     /**
      * Create the application.
@@ -367,7 +368,7 @@ public class ServerTest {
                             if (inputFromClient.available() > 0) {
                                 JSONObject jsonObject = (JSONObject) jsonParser.parse(inputFromClient.readUTF());
                                 String method = ((String) jsonObject.get("method_name")).trim().toLowerCase();
-
+                                System.out.println("raw json" + jsonObject);
                                 switch (method) {
 //                                    case "login":
 //                                        LoginProcessor loginProcessor = new LoginProcessor();
@@ -383,6 +384,8 @@ public class ServerTest {
                                         if (txtMessage.equals("regUserName")) {
                                             userName = (String) jsonObject.get("user_name");
                                             System.out.println(userName);
+                                            userNameArray.add(userName);
+                                            System.out.println(userNameArray);
                                         } else {
                                             systemMsg.put(jsonObject);
                                         }

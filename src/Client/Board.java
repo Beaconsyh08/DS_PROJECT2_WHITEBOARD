@@ -72,7 +72,6 @@ public class Board extends JFrame {
                 super.paint(g1);
                 g = (Graphics2D) g1;
                 for (int i = 0; i < shapes.size(); i++) {
-                    System.out.println("drawing");
                     Shape shape = (Shape) shapes.get(i);
 
                     g.setColor(shape.color);
@@ -187,7 +186,6 @@ public class Board extends JFrame {
                     messageArea.setForeground(Color.RED);
                 } else {
                     try {
-                        System.out.println(chatMessage);
                         sendMsg("message", user.getUserName(), chatMessage);
                     } catch (IOException | ParseException ex) {
                         ex.printStackTrace();
@@ -414,11 +412,18 @@ public class Board extends JFrame {
 
         Thread systemHandling = new Thread() {
             public void run() {
+                // reg name to connection
+                try {
+                    sendMsg("system", user.getUserName(), "regUserName");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
                 while (true) {
                     try {
                         JSONObject message = (JSONObject) systemMsg.take();
-                        System.out.println("System Message Received From Server: " + message);
-
                         String command = ((String) message.get("txt_message")).trim();
 
                         switch (command) {
@@ -474,9 +479,7 @@ public class Board extends JFrame {
                 while (true) {
                     try {
                         JSONObject message = (JSONObject) chatMsg.take();
-                        System.out.println("Message Received From Server: " + message);
                         readAndAppendChatMsg(message, chatWindowArea);
-//                        readAndAppendChatMsg(message,messageArea);
                     } catch (InterruptedException | IOException | ParseException e) {
                     }
                 }
@@ -487,15 +490,6 @@ public class Board extends JFrame {
 
         Thread drawHandling = new Thread() {
             public void run() {
-
-                // reg name to connection
-                try {
-                    sendMsg("system", user.getUserName(), "regUserName");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
 
                 // get full canvas
                 if (!user.isManager()) {
@@ -508,15 +502,10 @@ public class Board extends JFrame {
                     }
                 }
 
-
-
                 while (true) {
                     if (drawMsg.size() > 0) {
                         try {
                             JSONObject message = (JSONObject) drawMsg.take();
-                            System.out.println("draw take succ?");
-                            System.out.println("Message Received From Server: " + message);
-
                             // todo add handling process
                             Graphics gd = panel_darw.getGraphics();
                             parseAndDraw(message, gd);
@@ -560,7 +549,6 @@ public class Board extends JFrame {
         jsonWord.put("txt_message", message);
 
         // Send message to Server
-        System.out.println(jsonWord.toJSONString());
         outputToServer.writeUTF(jsonWord.toJSONString());
         outputToServer.flush();
     }
@@ -571,9 +559,6 @@ public class Board extends JFrame {
         String method = ((String) jsonObject.get("method_name")).trim().toLowerCase();
         String senderName = ((String) jsonObject.get("user_name")).trim();
         String message = ((String) jsonObject.get("txt_message")).trim();
-        System.out.println(method);
-        System.out.println(senderName);
-        System.out.println(message);
         chatWindowArea.append(senderName);
         chatWindowArea.append(": ");
         chatWindowArea.append(message);
@@ -592,8 +577,6 @@ public class Board extends JFrame {
         Color color = new Color(Integer.parseInt(((String) jsonDraw.get("color")).trim()));
         int strokeInt = Integer.parseInt((String) jsonDraw.get("stroke"));
 
-        System.out.println(Integer.parseInt(((String) jsonDraw.get("color")).trim()));
-        System.out.println(color);
         g2d.setColor(color);
         g2d.setStroke(stroke);
 
@@ -633,8 +616,6 @@ public class Board extends JFrame {
         ConnectionToServer(Socket socket) throws IOException {
             this.socket = socket;
             JSONParser jsonParser = new JSONParser();
-//            inputFromServer = new DataInputStream(socket.getInputStream());
-//            outputToServer = new DataOutputStream(socket.getOutputStream());
 
             Thread read = new Thread() {
                 public void run() {
@@ -652,9 +633,7 @@ public class Board extends JFrame {
                                         systemMsg.put(jsonObject);
                                         break;
                                     case "draw":
-                                        System.out.println("receive raw succ");
                                         drawMsg.put(jsonObject);
-                                        System.out.println("put succ?" + drawMsg);
                                         break;
                                 }
                             }
@@ -664,7 +643,6 @@ public class Board extends JFrame {
                     }
                 }
             };
-
             read.setDaemon(true);
             read.start();
         }
