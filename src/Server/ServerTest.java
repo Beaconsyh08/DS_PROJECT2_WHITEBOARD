@@ -381,6 +381,8 @@ public class ServerTest {
                                 finishJSON.put("txt_message", "finish");
                                 for (ConnectionToClient clientConnection : clientList) {
                                     clientConnection.parseAndReplyOrigin(finishJSON);
+                                    userNameArray.remove(clientConnection.getUserName());
+                                    updateConnectionList(clientConnection.getUserName());
                                 }
                                 break;
                         }

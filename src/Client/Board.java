@@ -57,7 +57,7 @@ public class Board extends JFrame {
                     if (user.isManager()){
                         for (String user: userList){
                             // todo trytry
-                            sendKick("finish",user);
+                            sendKick("finish", user);
                         }
                     }
                     System.exit(0);
@@ -662,7 +662,7 @@ public class Board extends JFrame {
                 break;
             case "Text":
                 g2d.drawString(text, x1, y1);
-                Shape shape5 = new Shape("Text", x1, y1, x2, y2, color, strokeInt, "");
+                Shape shape5 = new Shape("Text", x1, y1, x2, y2, color, strokeInt, text);
                 shapes.add(shape5);
                 break;
         }
