@@ -153,6 +153,14 @@ public class DrawListener implements MouseListener, MouseMotionListener {
             g.drawLine(x0, y0, x, y);
             Shape shape = new Shape("Line", x0, y0, x, y, g.getColor(), strokeint, "");
             shapes.add(shape);
+            JSONObject jsondraw = shape.toJSON(userName);
+            try {
+                sendCDrawMsg(jsondraw);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            } catch (ParseException ex) {
+                ex.printStackTrace();
+            }
             x0 = x;
             y0 = y;
         }
@@ -162,6 +170,14 @@ public class DrawListener implements MouseListener, MouseMotionListener {
             g.drawLine(x0, y0, x, y);
             Shape shape = new Shape("Line", x0, y0, x, y, g.getColor(), strokeint, "");
             shapes.add(shape);
+            JSONObject jsondraw = shape.toJSON(userName);
+            try {
+                sendCDrawMsg(jsondraw);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            } catch (ParseException ex) {
+                ex.printStackTrace();
+            }
             x0 = x;
             y0 = y;
         }

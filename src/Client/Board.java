@@ -48,6 +48,9 @@ public class Board extends JFrame {
         this.setDefaultCloseOperation(3);
         this.setLocationRelativeTo(null);
 
+        // set not resizable
+        this.setResizable(false);
+
         try {
             setPort(textFieldIPAddress, textFieldPort);
         } catch (InvalidPortNumberException | UnknownHostException ex) {

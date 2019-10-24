@@ -15,20 +15,9 @@
       <change beforePath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Client/Board$ConnectionToServer$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Client/Board$ConnectionToServer$1.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Client/Board$ConnectionToServer.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Client/Board$ConnectionToServer.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Client/Board.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Client/Board.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Client/ClientWelcome.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Client/ClientWelcome.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Client/Login$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Client/Login$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Client/Login$2.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Client/Login$2.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Client/Login$3.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Client/Login$3.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Client/Login.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Client/Login.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Server/DBUtils.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Server/DBUtils.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Server/ServerTest$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Server/ServerTest$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Server/ServerTest$2.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Server/ServerTest$2.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Server/ServerTest$3.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Server/ServerTest$3.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Server/ServerTest$ConnectionToClient$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Server/ServerTest$ConnectionToClient$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Server/ServerTest$ConnectionToClient.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Server/ServerTest$ConnectionToClient.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Server/ServerTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Server/ServerTest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Client/DrawListener.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/DS_PROJECT2_WHITEBOARD/Client/DrawListener.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Client/Board.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/Board.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Server/ServerTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Server/ServerTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Client/DrawListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client/DrawListener.java" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
