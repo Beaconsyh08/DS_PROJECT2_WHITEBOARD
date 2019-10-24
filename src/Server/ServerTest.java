@@ -345,11 +345,11 @@ public class ServerTest {
                                 System.out.println("Raw Received: " + jsonObject);
 
                                 switch (method) {
-                                    case "login":
-                                        LoginProcessor loginProcessor = new LoginProcessor();
-                                        logInStatus = loginProcessor.checkLoginProcessor(jsonObject, dbUtils);
-                                        System.out.println(jsonObject.toJSONString());
-                                        break;
+//                                    case "login":
+//                                        LoginProcessor loginProcessor = new LoginProcessor();
+//                                        logInStatus = loginProcessor.checkLoginProcessor(jsonObject, dbUtils);
+//                                        System.out.println(jsonObject.toJSONString());
+//                                        break;
                                     case "message":
                                         chatMsg.put(jsonObject);
                                         break;
@@ -363,7 +363,7 @@ public class ServerTest {
                                 }
 
                             }
-                        } catch (IOException | InterruptedException | ParseException | SQLException e) {
+                        } catch (IOException | InterruptedException | ParseException e) {
                             e.printStackTrace();
                         }
                     }
