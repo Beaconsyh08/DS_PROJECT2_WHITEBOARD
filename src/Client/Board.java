@@ -514,6 +514,7 @@ public class Board extends JFrame {
                                 break;
 
                             case "bye":
+                                JOptionPane.showMessageDialog(null, "You have been kicked out by the manager!");
                                 System.exit(0);
                                 break;
                         }
