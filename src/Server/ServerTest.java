@@ -239,6 +239,7 @@ public class ServerTest {
      */
     private void serverInitialize(int PORT) throws IOException {
 
+
         {
             printInitialInfo();
             serverSocket = new ServerSocket(PORT);
@@ -254,7 +255,8 @@ public class ServerTest {
                     while (true) {
                         // Listen for a new connection request
                         Socket clientSocket = serverSocket.accept();
-                        clientList.add(new ConnectionToClient(clientSocket));
+                        ConnectionToClient socketConnection = new ConnectionToClient(clientSocket);
+                        clientList.add(socketConnection);
                     }
                 } catch (IOException ex) {
                     ex.printStackTrace();
@@ -289,6 +291,7 @@ public class ServerTest {
 //                        System.out.println("Message Received: " + message);
                         // Do some handling here...
                         for (ConnectionToClient clientConnection : clientList) {
+                            System.out.println("clientList chat" + clientList);
                             clientConnection.parseAndReplyOrigin(message);
                         }
 
@@ -307,6 +310,7 @@ public class ServerTest {
 
                         // todo it send to everybody inclued the drawer, maybe improve? or just leave it
                         for (ConnectionToClient clientConnection : clientList) {
+                            System.out.println("clientList draw" + clientList);
                             clientConnection.parseAndReplyOrigin(message);
 //                            System.out.println(message);
                         }
@@ -353,6 +357,20 @@ public class ServerTest {
                             case "exit":
                                 String userNameExit = ((String) message.get("user_name")).trim();
                                 userNameArray.remove(userNameExit);
+                                // todo not right
+//                                Socket socketConnection = null;
+                                ArrayList<ConnectionToClient> newClientList = new ArrayList<ConnectionToClient>();
+                                for (ConnectionToClient clientConnection : clientList) {
+                                    if (clientConnection.getUserName().equals(userNameExit)){
+                                        clientConnection.setAlive(false);
+                                    }
+                                    if (clientConnection.isAlive) {
+                                        newClientList.add(clientConnection);
+                                    }
+                                }
+                                System.out.println("connection after delete" + newClientList);
+                                clientList = newClientList;
+//                                clientList.remove(socketConnection);
                                 System.out.println(userNameArray);
                                 JSONObject userListJSONUP = new JSONObject();
                                 userListJSONUP.put("method_name", "system");
@@ -379,6 +397,15 @@ public class ServerTest {
         private DataInputStream inputFromClient;
         private DataOutputStream outputToClient;
         private String userName;
+        private boolean isAlive = true;
+
+        public boolean isAlive() {
+            return isAlive;
+        }
+
+        public void setAlive(boolean alive) {
+            isAlive = alive;
+        }
 
         ConnectionToClient(Socket socket) throws IOException {
             this.socket = socket;
