@@ -8,10 +8,7 @@ import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -50,6 +47,16 @@ public class Board extends JFrame {
 
         // set not resizable
         this.setResizable(false);
+        this.addWindowListener( new WindowAdapter() {
+            public void windowClosing(WindowEvent we) {
+                try {
+                    sendMsg("system", user.getUserName(), "exit");
+                    System.exit(0);
+                } catch (IOException | ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
 
         try {
             setPort(textFieldIPAddress, textFieldPort);
@@ -410,17 +417,17 @@ public class Board extends JFrame {
         } catch (IOException e) {
         }
 
+        // reg name to connection
+        try {
+            sendMsg("system", user.getUserName(), "regUserName");
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
         Thread systemHandling = new Thread() {
             public void run() {
-                // reg name to connection
-                try {
-                    sendMsg("system", user.getUserName(), "regUserName");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-
                 while (true) {
                     try {
                         JSONObject message = (JSONObject) systemMsg.take();

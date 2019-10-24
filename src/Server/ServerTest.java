@@ -336,7 +336,18 @@ public class ServerTest {
                                 }
                                 break;
 
-//                            case
+                            case "regUserName":
+                                String userName = ((String) message.get("user_name")).trim();
+                                System.out.println(userName);
+                                userNameArray.add(userName);
+                                System.out.println(userNameArray);
+                                break;
+
+                            case "exit":
+                                String userNameExit = ((String) message.get("user_name")).trim();
+                                userNameArray.remove(userNameExit);
+                                System.out.println(userNameArray);
+                                break;
                         }
 
                     }
@@ -379,16 +390,11 @@ public class ServerTest {
                                         chatMsg.put(jsonObject);
                                         break;
                                     case "system":
-                                        // reg name
-                                        String txtMessage = ((String) jsonObject.get("txt_message")).trim();
-                                        if (txtMessage.equals("regUserName")) {
-                                            userName = ((String) jsonObject.get("user_name")).trim();
-                                            System.out.println(userName);
-                                            userNameArray.add(userName);
-                                            System.out.println(userNameArray);
-                                        } else {
-                                            systemMsg.put(jsonObject);
+                                        if (((String) jsonObject.get("txt_message")).trim().equals("regUserName")) {
+                                            String userNameNew = ((String) jsonObject.get("user_name")).trim();
+                                            setUserName(userNameNew);
                                         }
+                                        systemMsg.put(jsonObject);
                                         break;
                                     case "draw":
                                         drawMsg.put(jsonObject);
@@ -410,6 +416,10 @@ public class ServerTest {
 
         public String getUserName() {
             return userName;
+        }
+
+        public void setUserName(String userName) {
+            this.userName = userName;
         }
 
         public void parseAndReplyOrigin(JSONObject jsonObject) throws IOException {

@@ -177,7 +177,7 @@ public class ClientWelcome {
         JButton btnJoin = new JButton("Join");
         btnJoin.setToolTipText("Join an existing white board");
         btnJoin.addActionListener(e -> {
-            userName = txtUserName.getText();
+            userName = txtUserName.getText().trim();
             UserProfile user = new UserProfile(userName, false);
             Board boardClient = new Board(user, textFieldIPAddress, textFieldPort, txtSystemMessage);
             System.out.println("user_name:" + userName);
@@ -204,7 +204,7 @@ public class ClientWelcome {
         btnCreate.setBackground(new Color(51, 255, 0));
         btnCreate.setBounds(409, 393, 150, 50);
         btnCreate.addActionListener(e -> {
-            userName = txtUserName.getText();
+            userName = txtUserName.getText().trim();
             UserProfile user = new UserProfile(userName, true);
             Board boardClient = new Board(user, textFieldIPAddress, textFieldPort, txtSystemMessage);
             System.out.println("user_name:" + userName);
