@@ -15,6 +15,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -35,7 +36,6 @@ public class ServerTest {
     private LinkedBlockingQueue<JSONObject> chatMsg;
     private LinkedBlockingQueue<JSONObject> systemMsg;
     private LinkedBlockingQueue<JSONObject> drawMsg;
-    private static DBUtils dbUtils;
     private ArrayList<JSONObject> canvasShapes;
     private ArrayList<String> userNameArray = new ArrayList<String>();
 
