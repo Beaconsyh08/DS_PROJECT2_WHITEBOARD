@@ -257,7 +257,6 @@ public class ServerTest {
                         // Listen for a new connection request
                         Socket clientSocket = serverSocket.accept();
                         clientList.add(new ConnectionToClient(clientSocket));
-                        System.out.println(clientList);
                         // Create and start a new thread for the connection
 //                        new Thread(new MessageHandler(clientSocket)).start();
                     }
@@ -275,8 +274,8 @@ public class ServerTest {
 //                        message.put("status", logInStatus);
 //                        System.out.println("Message Received: " + message);
 //
-//                        for (ConnectionToClient clientSocket : clientList) {
-//                            clientSocket.parseAndReplyOrigin(message);
+//                        for (ConnectionToClient clientConnection : clientList) {
+//                            clientConnection.parseAndReplyOrigin(message);
 //                            System.out.println(message);
 //                        }
 //
@@ -291,11 +290,10 @@ public class ServerTest {
                 try {
                     while (true) {
                         JSONObject message = chatMsg.take();
-                        System.out.println("Message Received: " + message);
+//                        System.out.println("Message Received: " + message);
                         // Do some handling here...
-                        for (ConnectionToClient clientSocket : clientList) {
-                            clientSocket.parseAndReplyOrigin(message);
-                            System.out.println(message);
+                        for (ConnectionToClient clientConnection : clientList) {
+                            clientConnection.parseAndReplyOrigin(message);
                         }
 
                     }
@@ -309,12 +307,12 @@ public class ServerTest {
                 try {
                     while (true) {
                         JSONObject message = drawMsg.take();
-                        System.out.println("Message Received: " + message);
+//                        System.out.println("Message Received: " + message);
 
                         // todo it send to everybody inclued the drawer, maybe improve? or just leave it
-                        for (ConnectionToClient clientSocket : clientList) {
-                            clientSocket.parseAndReplyOrigin(message);
-                            System.out.println(message);
+                        for (ConnectionToClient clientConnection : clientList) {
+                            clientConnection.parseAndReplyOrigin(message);
+//                            System.out.println(message);
                         }
 
                     }
@@ -328,7 +326,6 @@ public class ServerTest {
                 try {
                     while (true) {
                         JSONObject message = systemMsg.take();
-                        System.out.println("Message Received: " + message);
                         String txtMessage = ((String) message.get("txt_message")).trim();
                         switch (txtMessage){
                             case "fullCanvas":
@@ -337,9 +334,8 @@ public class ServerTest {
                                     canvasShapeJSON.put("method_name", "system");
                                     canvasShapeJSON.put("shape", canvasShape);
                                     canvasShapeJSON.put("txt_message", "add_to_shapes");
-                                    for (ConnectionToClient clientSocket : clientList) {
-                                        clientSocket.parseAndReplyOrigin(canvasShapeJSON);
-                                        System.out.println(canvasShapeJSON);
+                                    for (ConnectionToClient clientConnection : clientList) {
+                                        clientConnection.parseAndReplyOrigin(canvasShapeJSON);
                                     }
                                 }
                                 break;
@@ -373,8 +369,6 @@ public class ServerTest {
                             if (inputFromClient.available() > 0) {
                                 JSONObject jsonObject = (JSONObject) jsonParser.parse(inputFromClient.readUTF());
                                 String method = ((String) jsonObject.get("method_name")).trim().toLowerCase();
-                                System.out.println(method);
-                                System.out.println("Raw Received: " + jsonObject);
 
                                 switch (method) {
 //                                    case "login":
@@ -387,12 +381,10 @@ public class ServerTest {
                                         break;
                                     case "system":
                                         systemMsg.put(jsonObject);
-                                        System.out.println("system receive suscc" + systemMsg);
                                         break;
                                     case "draw":
                                         drawMsg.put(jsonObject);
                                         canvasShapes.add(jsonObject);
-                                        System.out.println(drawMsg);
                                         break;
                                 }
 
