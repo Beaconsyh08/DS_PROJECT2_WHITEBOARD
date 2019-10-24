@@ -35,6 +35,8 @@ public class Board extends JFrame {
     private LinkedBlockingQueue<Object> systemMsg;
     private LinkedBlockingQueue<Object> drawMsg;
     private ArrayList<String> userList;
+    private DefaultListModel<String> userListModel = new DefaultListModel<String>();
+    private JList<String> UserList = new JList<String>();
 
 
     //initialize
@@ -207,21 +209,13 @@ public class Board extends JFrame {
         scrollUserList.setBounds(210, 27, 84, 442);
         panelright.add(scrollUserList);
 
-        JList<String> UserList = new JList<String>();
+
         UserList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         UserList.setFont(new Font("Lucida Grande", Font.PLAIN, 13));
-        UserList.setModel(new AbstractListModel<String>() {
-
-            String[] values = new String[]{"User1", "User2", "User3", "User4", "User5"};
-
-            public int getSize() {
-                return values.length;
-            }
-
-            public String getElementAt(int index) {
-                return values[index];
-            }
-        });
+//        for(int i = 0; i < userList.size(); i ++) {
+//            userListModel.addElement(userList.get(i));
+//        }
+//        UserList.setModel(userListModel);
         scrollUserList.setViewportView(UserList);
 
         JButton btnKickOut = new JButton("Kick Out");
@@ -494,6 +488,11 @@ public class Board extends JFrame {
                             case "update_user_list":
                                 userList = ((ArrayList<String>) message.get("userList"));
                                 System.out.println("updated userlist " + userList);
+                                userListModel.clear();
+                                for(int i = 0; i < userList.size(); i ++) {
+                                    userListModel.addElement(userList.get(i));
+                                }
+                                UserList.setModel(userListModel);
                         }
 
 
