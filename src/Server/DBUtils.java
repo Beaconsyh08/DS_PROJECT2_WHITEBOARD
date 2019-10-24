@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 public class DBUtils {
 
-    private static final String url = "jdbc:mysql://localhost:3306?useSSL=false";
+    private static final String url = "jdbc:mysql://localhost:3306/ds_project2?allowPublicKeyRetrieval=true&useSSL=false";
     private static final String user = "root";
     private static final String password = "root";
     private static Connection connection;

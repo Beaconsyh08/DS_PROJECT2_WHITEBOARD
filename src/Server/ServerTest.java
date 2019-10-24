@@ -36,7 +36,6 @@ public class ServerTest {
     private LinkedBlockingQueue<JSONObject> systemMsg;
     private LinkedBlockingQueue<JSONObject> drawMsg;
     private static DBUtils dbUtils;
-    private static int logInStatus;
     private ArrayList<JSONObject> canvasShapes;
 
     /**
@@ -265,26 +264,6 @@ public class ServerTest {
                 }
             }).start();
 
-            //todo 只给来的人发
-            // login thread
-//            new Thread(() -> {
-//                try {
-//                    while (true) {
-//                        JSONObject message = new JSONObject();
-//                        message.put("status", logInStatus);
-//                        System.out.println("Message Received: " + message);
-//
-//                        for (ConnectionToClient clientConnection : clientList) {
-//                            clientConnection.parseAndReplyOrigin(message);
-//                            System.out.println(message);
-//                        }
-//
-//                    }
-//                } catch (IOException ex) {
-//                    ex.printStackTrace();
-//                }
-//            }).start();
-
             // chat message thread
             new Thread(() -> {
                 try {
@@ -371,11 +350,12 @@ public class ServerTest {
                                 String method = ((String) jsonObject.get("method_name")).trim().toLowerCase();
 
                                 switch (method) {
-//                                    case "login":
-//                                        LoginProcessor loginProcessor = new LoginProcessor();
-//                                        logInStatus = loginProcessor.checkLoginProcessor(jsonObject, dbUtils);
-//                                        System.out.println(jsonObject.toJSONString());
-//                                        break;
+                                    case "login":
+                                        System.out.println(jsonObject.toJSONString());
+                                        LoginProcessor loginProcessor = new LoginProcessor();
+                                        loginProcessor.checkLoginProcessor(jsonObject, dbUtils, socket);
+                                        System.out.println(jsonObject.toJSONString());
+                                        break;
                                     case "message":
                                         chatMsg.put(jsonObject);
                                         break;
@@ -389,7 +369,7 @@ public class ServerTest {
                                 }
 
                             }
-                        } catch (IOException | InterruptedException | ParseException e) {
+                        } catch (IOException | InterruptedException | ParseException | SQLException e) {
                             e.printStackTrace();
                         }
                     }
@@ -407,4 +387,5 @@ public class ServerTest {
         }
 
     }
+
 }

@@ -2,6 +2,9 @@ package Server;
 
 import org.json.simple.JSONObject;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -9,36 +12,61 @@ import java.sql.Statement;
 
 public class LoginProcessor {
 
-    public int checkLoginProcessor(JSONObject jsonObject, DBUtils dbUtils) throws SQLException {
+    public void checkLoginProcessor(JSONObject jsonObject, DBUtils dbUtils, Socket socket) throws SQLException {
         String username = (String) jsonObject.get("username");
         String password = (String) jsonObject.get("password");
 
+        int logInStatus = 0;
 
         Connection connection = dbUtils.getConnection();
 
         //check existence
-        String checkExistence = "SELECT * FROM user WHERE username = " + username;
+//        String checkExistence = "SELECT * FROM user WHERE username" + " = " +  "'" + username + "'";
+        //todo 有问题，username只能是数字
+        String checkExistence = "SELECT * FROM user WHERE user.username = '" + username + "'";
+        System.out.println(checkExistence);
         Statement statement1 = connection.createStatement();
         ResultSet rs1 = statement1.executeQuery(checkExistence);
 
-        if (!rs1.next()) {
+        int size = 0;
+        if (rs1 != null) {
+            rs1.last();
+            size = rs1.getRow();
+        }
+
+        if (size == 0) {
             String createUser = "INSERT INTO user (userID, username, managerID, password) VALUE (NULL, "
                     + username + ",NULL, " + password + ")";
             Statement statement2 = connection.createStatement();
             statement2.execute(createUser);
-            return 1;
+            logInStatus = 1;
         } else {
-            while (rs1.next()) {
-                String passw = rs1.getString("password");
-                if (passw.equals(password)) {
-                    return 2;
-                } else {
-                    return 3;
-                }
-
+            String passw = rs1.getString("password");
+            if (passw.equals(password)) {
+                logInStatus = 2;
+            } else {
+                logInStatus = 3;
             }
+
         }
-        return 5;
+
+        // login thread
+        int finalLogInStatus = logInStatus;
+        new Thread(() -> {
+            try {
+                while (true) {
+                    JSONObject message = new JSONObject();
+                    message.put("status", finalLogInStatus);
+                    DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
+                    outputStream.writeUTF(message.toJSONString());
+                    outputStream.flush();
+                    System.out.println("message send: " + message);
+                    //todo 输错一次后会传两次json
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }).start();
     }
 
 }
