@@ -1,5 +1,6 @@
 package Server;
 
+import Client.Shape;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -31,11 +32,12 @@ public class ServerTest {
     private String portIndicator = "Enter Port";
     private JTextArea txtMsg;
     private ArrayList<ConnectionToClient> clientList;
-    private LinkedBlockingQueue<Object> chatMsg;
-    private LinkedBlockingQueue<Object> systemMsg;
-    private LinkedBlockingQueue<Object> drawMsg;
+    private LinkedBlockingQueue<JSONObject> chatMsg;
+    private LinkedBlockingQueue<JSONObject> systemMsg;
+    private LinkedBlockingQueue<JSONObject> drawMsg;
     private static DBUtils dbUtils;
     private static int logInStatus;
+    private ArrayList<JSONObject> canvasShapes;
 
     /**
      * Create the application.
@@ -242,9 +244,11 @@ public class ServerTest {
             printInitialInfo();
             serverSocket = new ServerSocket(PORT);
             clientList = new ArrayList<ConnectionToClient>();
-            chatMsg = new LinkedBlockingQueue<Object>();
-            drawMsg = new LinkedBlockingQueue<Object>();
-            systemMsg = new LinkedBlockingQueue<Object>();
+            chatMsg = new LinkedBlockingQueue<JSONObject>();
+            drawMsg = new LinkedBlockingQueue<JSONObject>();
+            systemMsg = new LinkedBlockingQueue<JSONObject>();
+            canvasShapes = new ArrayList<JSONObject>();
+
             new Thread(() -> {
                 try {
                     // Create a server socket
@@ -286,7 +290,7 @@ public class ServerTest {
             new Thread(() -> {
                 try {
                     while (true) {
-                        JSONObject message = (JSONObject) chatMsg.take();
+                        JSONObject message = chatMsg.take();
                         System.out.println("Message Received: " + message);
                         // Do some handling here...
                         for (ConnectionToClient clientSocket : clientList) {
@@ -304,13 +308,41 @@ public class ServerTest {
             new Thread(() -> {
                 try {
                     while (true) {
-                        JSONObject message = (JSONObject) drawMsg.take();
+                        JSONObject message = drawMsg.take();
                         System.out.println("Message Received: " + message);
 
                         // todo it send to everybody inclued the drawer, maybe improve? or just leave it
                         for (ConnectionToClient clientSocket : clientList) {
                             clientSocket.parseAndReplyOrigin(message);
                             System.out.println(message);
+                        }
+
+                    }
+                } catch (InterruptedException | IOException ex) {
+                    ex.printStackTrace();
+                }
+            }).start();
+
+            // system thread
+            new Thread(() -> {
+                try {
+                    while (true) {
+                        JSONObject message = systemMsg.take();
+                        System.out.println("Message Received: " + message);
+                        String txtMessage = ((String) message.get("txt_message")).trim();
+                        switch (txtMessage){
+                            case "fullCanvas":
+                                for (JSONObject canvasShape: canvasShapes){
+                                    JSONObject canvasShapeJSON = new JSONObject();
+                                    canvasShapeJSON.put("method_name", "system");
+                                    canvasShapeJSON.put("shape", canvasShape);
+                                    canvasShapeJSON.put("txt_message", "add_to_shapes");
+                                    for (ConnectionToClient clientSocket : clientList) {
+                                        clientSocket.parseAndReplyOrigin(canvasShapeJSON);
+                                        System.out.println(canvasShapeJSON);
+                                    }
+                                }
+                                break;
                         }
 
                     }
@@ -355,9 +387,11 @@ public class ServerTest {
                                         break;
                                     case "system":
                                         systemMsg.put(jsonObject);
+                                        System.out.println("system receive suscc" + systemMsg);
                                         break;
                                     case "draw":
                                         drawMsg.put(jsonObject);
+                                        canvasShapes.add(jsonObject);
                                         System.out.println(drawMsg);
                                         break;
                                 }
@@ -379,7 +413,6 @@ public class ServerTest {
             outputToClient.writeUTF(jsonObject.toJSONString());
             outputToClient.flush();
         }
-
 
     }
 }

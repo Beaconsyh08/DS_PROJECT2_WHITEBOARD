@@ -25,6 +25,8 @@ public class Board extends JFrame {
     public ArrayList<Shape> shapes = new ArrayList<Shape>();
     public File file_opened = null;
     public Socket socket;
+    public Graphics2D g;
+    public JPanel panel_darw;
     private int portNumber;
     private DataInputStream inputFromServer;
     private DataOutputStream outputToServer;
@@ -35,8 +37,6 @@ public class Board extends JFrame {
     private LinkedBlockingQueue<Object> chatMsg;
     private LinkedBlockingQueue<Object> systemMsg;
     private LinkedBlockingQueue<Object> drawMsg;
-    public Graphics2D g;
-    public JPanel panel_darw;
 
 
     //initialize
@@ -57,6 +57,8 @@ public class Board extends JFrame {
             txtSystemMessage.setText(ex.getMessage());
             txtSystemMessage.setForeground(Color.RED);
         }
+
+
 
         //main panel
         JPanel panel = new JPanel();
@@ -187,7 +189,7 @@ public class Board extends JFrame {
                 } else {
                     try {
                         System.out.println(chatMessage);
-                        sendChatMsg("message", user.getUserName(), chatMessage);
+                        sendMsg("message", user.getUserName(), chatMessage);
                     } catch (IOException | ParseException ex) {
                         ex.printStackTrace();
                     }
@@ -411,6 +413,63 @@ public class Board extends JFrame {
         } catch (IOException e) {
         }
 
+        Thread systemHandling = new Thread() {
+            public void run() {
+                while (true) {
+                    try {
+                        JSONObject message = (JSONObject) systemMsg.take();
+                        System.out.println("System Message Received From Server: " + message);
+
+                        String command = ((String) message.get("txt_message")).trim();
+
+                        switch (command){
+                            case "add_to_shapes":
+                                JSONObject jsonDraw = (JSONObject) message.get("shape");
+
+                                String type = ((String) jsonDraw.get("type")).trim();
+                                String text = ((String) jsonDraw.get("text")).trim();
+                                int x1 = Integer.parseInt((String) jsonDraw.get("x1"));
+                                int x2 = Integer.parseInt((String) jsonDraw.get("x2"));
+                                int y1 = Integer.parseInt((String) jsonDraw.get("y1"));
+                                int y2 = Integer.parseInt((String) jsonDraw.get("y2"));
+//                                Stroke stroke = new BasicStroke(Integer.parseInt((String) jsonDraw.get("stroke")));
+                                int stroke = Integer.parseInt((String) jsonDraw.get("stroke"));
+                                Color color = new Color(Integer.parseInt(((String) jsonDraw.get("color")).trim()));
+
+                                switch (type){
+                                    case "Line":
+                                        Shape shape = new Shape("Line", x1, y1, x2, y2, color, stroke, "");
+                                        shapes.add(shape);
+                                        break;
+                                    case "Rectangle":
+                                        Shape shape2 = new Shape("Rectangle", x1, y1, x2, y2, color,stroke, "");
+                                        shapes.add(shape2);
+                                        break;
+                                    case "Oval":
+                                        Shape shape3 = new Shape("Oval", x1, y1, x2, y2, color, stroke, "");
+                                        shapes.add(shape3);
+                                        break;
+                                    case "Circle":
+                                        Shape shape4 = new Shape("Circle", x1, y1, x2, y2, color, stroke, "");
+                                        shapes.add(shape4);
+                                        break;
+                                    case "Text":
+                                        Shape shape5 = new Shape("Text", x1, y1, x2, y2, color, stroke, "");
+                                        shapes.add(shape5);
+                                        break;
+                                }
+                                break;
+                        }
+
+
+                    } catch (InterruptedException e) {
+                    }
+                }
+            }
+        };
+        systemHandling.setDaemon(true);
+        systemHandling.start();
+
         Thread messageHandling = new Thread() {
             public void run() {
                 while (true) {
@@ -428,51 +487,20 @@ public class Board extends JFrame {
         messageHandling.start();
 
         Thread drawHandling = new Thread() {
-            //todo 这里不是只要跑一次嘛，你确定要while true?
             public void run() {
+                // todo get full canvas
+                if (!user.isManager()) {
+                    try {
+                        sendMsg("system", user.getUserName(), "fullCanvas");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                }
+
                 while (true) {
                     if (drawMsg.size() > 0) {
-//                        //todo 初始化
-//                        shapes = new ArrayList<>();
-//                        for (int i = 0; i < drawMsg.size(); i ++){
-//                            //todo 一个个获取，因该是这个方法
-//                            //todo (Shape) 这么写会报错，你决定一下传jsonobject还是直接传object, 你要传JSONObject的话再写个方法把他转会shape
-//                            Shape tmp = (Shape) drawMsg.peek();
-//                            shapes.add(tmp);
-//                        }
-//                        //todo 先复制过来将就用吧
-//                        JPanel panel_darw = new JPanel() {
-//                            //repaint
-//                            public void paint(Graphics g1) {
-//                                super.paint(g1);
-//                                g = (Graphics2D) g1;
-//                                for (int i = 0; i < shapes.size(); i++) {
-//                                    System.out.println("drawing");
-//                                    Shape shape = (Shape) shapes.get(i);
-//
-//                                    g.setColor(shape.color);
-//                                    g.setStroke(new BasicStroke(shape.stroke));
-//                                    int x1 = shape.x1;
-//                                    int x2 = shape.x2;
-//                                    int y1 = shape.y1;
-//                                    int y2 = shape.y2;
-//                                    if (shape.type.equals("Line")) {
-//                                        g.drawLine(shape.x1, shape.y1, shape.x2, shape.y2);
-//                                    } else if (shape.type.equals("Rectangle")) {
-//                                        g.drawRect(Math.min(x2, x1), Math.min(y2, y1), Math.abs(x2 - x1), Math.abs(y1 - y2));
-//                                    } else if (shape.type.equals("Oval")) {
-//                                        g.drawOval(Math.min(x2, x1), Math.min(y2, y1), Math.abs(x2 - x1), Math.abs(y1 - y2));
-//                                    } else if (shape.type.equals("Circle")) {
-//                                        int r = (int) Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-//                                        g.drawOval(x1, y1, r, r);
-//                                    } else if (shape.type.equals("Text")) {
-//                                        g.drawString(shape.text, x1, y1);
-//                                    }
-//                                }
-//                            }
-//                        };
-//                        //todo repaint 在这里调
-//                        panel_darw.repaint();
                         try {
                             JSONObject message = (JSONObject) drawMsg.take();
                             System.out.println("draw take succ?");
@@ -512,13 +540,13 @@ public class Board extends JFrame {
     }
 
     // Send the JSON object to the server and receive the feedback
-    private void sendChatMsg(String method, String userName, String message)
+    private void sendMsg(String method, String userName, String message)
             throws IOException, ParseException {
         // Output and Input Stream
         JSONObject jsonWord = new JSONObject();
         jsonWord.put("method_name", method);
         jsonWord.put("user_name", userName);
-        jsonWord.put("chat_message", message);
+        jsonWord.put("txt_message", message);
 
         // Send message to Server
         System.out.println(jsonWord.toJSONString());
@@ -531,7 +559,7 @@ public class Board extends JFrame {
     private void readAndAppendChatMsg(JSONObject jsonObject, JTextArea chatWindowArea) throws IOException, ParseException {
         String method = ((String) jsonObject.get("method_name")).trim().toLowerCase();
         String senderName = ((String) jsonObject.get("user_name")).trim();
-        String message = ((String) jsonObject.get("chat_message")).trim();
+        String message = ((String) jsonObject.get("txt_message")).trim();
         System.out.println(method);
         System.out.println(senderName);
         System.out.println(message);

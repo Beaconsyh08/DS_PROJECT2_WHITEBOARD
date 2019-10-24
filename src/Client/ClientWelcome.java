@@ -4,7 +4,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
-import java.net.UnknownHostException;
 
 /**
  * Description
@@ -180,7 +179,7 @@ public class ClientWelcome {
         btnJoin.addActionListener(e -> {
             userName = txtUserName.getText();
             UserProfile user = new UserProfile(userName, false);
-            Board boardClient = new Board(user,textFieldIPAddress, textFieldPort, txtSystemMessage);
+            Board boardClient = new Board(user, textFieldIPAddress, textFieldPort, txtSystemMessage);
             System.out.println("user_name:" + userName);
 
             try {
@@ -207,7 +206,7 @@ public class ClientWelcome {
         btnCreate.addActionListener(e -> {
             userName = txtUserName.getText();
             UserProfile user = new UserProfile(userName, true);
-            Board boardClient = new Board(user,textFieldIPAddress, textFieldPort, txtSystemMessage);
+            Board boardClient = new Board(user, textFieldIPAddress, textFieldPort, txtSystemMessage);
             System.out.println("user_name:" + userName);
 
             try {
