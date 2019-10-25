@@ -491,14 +491,15 @@ public class Board extends JFrame {
         } catch (IOException e) {
         }
 
-        // reg name to connection
-        try {
-            sendMsg("system", user.getUserName(), "regUserName");
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+//        // reg name to connection
+//        try {
+//            sendMsg4("system", user.getUserName(), "regUserName", Boolean.toString(user.isManager()));
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } catch (ParseException e) {
+//            e.printStackTrace();
+//        }
+
 
         try {
             sendMsg("system", user.getUserName(), "fullUserList");
@@ -649,7 +650,12 @@ public class Board extends JFrame {
                         try {
                             JSONObject message = (JSONObject) drawMsg.take();
                             String drawerName = (String) message.get("user_name");
-                            lblDrawing.setText(drawerName + " is drawing...");
+                            // todo problem?
+                            try {
+                                lblDrawing.setText(drawerName + " is drawing...");
+                            } catch (NullPointerException e) {
+                                e.printStackTrace();
+                            }
                             Graphics gd = panel_darw.getGraphics();
                             parseAndDraw(message, gd);
                             time1 = LocalDateTime.now();
@@ -700,6 +706,26 @@ public class Board extends JFrame {
             jsonWord.put("method_name", method);
             jsonWord.put("user_name", userName);
             jsonWord.put("txt_message", message);
+
+            // Send message to Server
+            outputToServer.writeUTF(jsonWord.toJSONString());
+            outputToServer.flush();
+        } catch (SocketException e) {
+            // todo tanchuang
+            e.printStackTrace();
+            System.out.println("hahaha");
+        }
+    }
+
+    private void sendMsg4(String method, String userName, String message, String other)
+            throws IOException, ParseException {
+        // Output and Input Stream
+        try {
+            JSONObject jsonWord = new JSONObject();
+            jsonWord.put("method_name", method);
+            jsonWord.put("user_name", userName);
+            jsonWord.put("txt_message", message);
+            jsonWord.put("other", other);
 
             // Send message to Server
             outputToServer.writeUTF(jsonWord.toJSONString());

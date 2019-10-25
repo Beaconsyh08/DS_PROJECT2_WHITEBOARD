@@ -1,10 +1,16 @@
 package Client;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
 
 /**
  * Description
@@ -17,24 +23,30 @@ import java.net.Socket;
 public class ClientWelcome {
     private String userName;
     private JFrame frmWelcomePage;
-//    private JTextField textFieldPort;
+    //    private JTextField textFieldPort;
     private JLabel lblNewLabel;
     private JScrollPane scrollPane;
     private JTextArea txtSystemMessage;
-//    private JTextField textFieldIPAddress;
+    //    private JTextField textFieldIPAddress;
 //    private JLabel lblUserName;
 //    private JTextField txtUserName;
     private JButton btnCreate;
-//    private String userName;
+    //    private String userName;
+    private DataOutputStream outputToServer;
+    private DataInputStream inputFromServer;
+    private JSONParser jsonParser = new JSONParser();
+    private String isCreatedStr;
+    private UserProfile user;
 
     /**
      * Create the application.
      *
      * @wbp.parser.entryPoint
      */
-    public ClientWelcome(String userName, Socket socket, JTextField ip, JTextField port) {
+    public ClientWelcome(String userName, Socket socket, JTextField ip, JTextField port, UserProfile user) {
         this.userName = userName;
-        initialize(socket,ip,port);
+        this.user = user;
+        initialize(socket, ip, port);
         frmWelcomePage.setVisible(true);
     }
 
@@ -133,8 +145,8 @@ public class ClientWelcome {
         txtSystemMessage.setEditable(false);
         txtSystemMessage.setForeground(new Color(255, 94, 33));
         txtSystemMessage.setFont(new Font("Georgia", Font.PLAIN, 20));
-        txtSystemMessage.setText("If Port Number is not entered." + "\n" + "The default Port Number: 2019 will be used."
-                + "\n" + "If IP Address is not entered." + "\n" + "The default IP Address: 127.0.0.1 will be used.");
+        txtSystemMessage.setText("You could join after manager approval." + "\n" + "You could create a board if there is no board exist."
+                + "\n" + "Don't join before board exist.");
         scrollPane.setViewportView(txtSystemMessage);
 
 //        JLabel lblIPAdress = new JLabel("IP ADDRESS:");
@@ -178,9 +190,30 @@ public class ClientWelcome {
         // CONNECT BUTTON: connect to the server and go to next window if connected
         JButton btnJoin = new JButton("Join");
         btnJoin.setToolTipText("Join an existing white board");
+
         btnJoin.addActionListener(e -> {
+
+            try {
+                outputToServer = new DataOutputStream(socket.getOutputStream());
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+            try {
+                sendMsg("initialize", userName, "joinBoard");
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            } catch (ParseException ex) {
+                ex.printStackTrace();
+            }
+            try {
+                inputFromServer = new DataInputStream(socket.getInputStream());
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+
+
 //            userName = txtUserName.getText().trim();
-            UserProfile user = new UserProfile(userName, false);
+
             Board boardClient = new Board(user, ip, port, txtSystemMessage, socket);
             System.out.println("user_name:" + userName);
 
@@ -207,20 +240,65 @@ public class ClientWelcome {
         btnCreate.setBounds(409, 393, 150, 50);
         btnCreate.addActionListener(e -> {
 //            userName = txtUserName.getText().trim();
-            UserProfile user = new UserProfile(userName, true);
-            //todo here
-            Board boardClient = new Board(user, ip, port, txtSystemMessage, socket);
-            System.out.println("user_name:" + userName);
+            try {
+                outputToServer = new DataOutputStream(socket.getOutputStream());
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+            try {
+                sendMsg("initialize", userName, "createBoard");
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            } catch (ParseException ex) {
+                ex.printStackTrace();
+            }
 
             try {
-                if (boardClient.socket.isConnected()) {
-                    System.out.println("True");
-                    boardClient.setVisible(true);
-                    frmWelcomePage.setVisible(false);
+                inputFromServer = new DataInputStream(socket.getInputStream());
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+
+            try {
+                JSONObject jsonObject = (JSONObject) jsonParser.parse(inputFromServer.readUTF());
+                isCreatedStr = ((String) jsonObject.get("txt_message")).trim();
+                System.out.println(jsonObject);
+            } catch (ParseException ex) {
+                ex.printStackTrace();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+
+
+            System.out.println(isCreatedStr);
+            if (isCreatedStr.equals("false")) {
+                //todo here
+                user.setManager(true);
+                Board boardClient = new Board(user, ip, port, txtSystemMessage, socket);
+                System.out.println("user_name:" + userName);
+
+                try {
+                    if (boardClient.socket.isConnected()) {
+                        System.out.println("True");
+                        boardClient.setVisible(true);
+                        frmWelcomePage.setVisible(false);
+                    }
+                } catch (NullPointerException ex) {
+                    txtSystemMessage.setText("Make sure server is on!" + "\n" + "Make sure correct port and IP Address are entered! ");
+                    txtSystemMessage.setForeground(Color.RED);
                 }
-            } catch (NullPointerException ex) {
-                txtSystemMessage.setText("Make sure server is on!" + "\n" + "Make sure correct port and IP Address are entered! ");
-                txtSystemMessage.setForeground(Color.RED);
+                // todo set manager
+                try {
+                    sendMsg("system", userName, "setManager");
+
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                } catch (ParseException ex) {
+                    ex.printStackTrace();
+                }
+
+            } else {
+                JOptionPane.showMessageDialog(null, "Board already exists, please join it");
             }
         });
         frmWelcomePage.getContentPane().add(btnCreate);
@@ -229,6 +307,45 @@ public class ClientWelcome {
     // todo
     private boolean checkEmpty() {
         return true;
+    }
+
+    private void sendMsg(String method, String userName, String message)
+            throws IOException, ParseException {
+        // Output and Input Stream
+        try {
+            JSONObject jsonWord = new JSONObject();
+            jsonWord.put("method_name", method);
+            jsonWord.put("user_name", userName);
+            jsonWord.put("txt_message", message);
+
+            // Send message to Server
+            outputToServer.writeUTF(jsonWord.toJSONString());
+            outputToServer.flush();
+        } catch (SocketException e) {
+            // todo tanchuang
+            e.printStackTrace();
+            System.out.println("hahaha");
+        }
+    }
+
+    private void sendMsg4(String method, String userName, String message, String other)
+            throws IOException, ParseException {
+        // Output and Input Stream
+        try {
+            JSONObject jsonWord = new JSONObject();
+            jsonWord.put("method_name", method);
+            jsonWord.put("user_name", userName);
+            jsonWord.put("txt_message", message);
+            jsonWord.put("other", other);
+
+            // Send message to Server
+            outputToServer.writeUTF(jsonWord.toJSONString());
+            outputToServer.flush();
+        } catch (SocketException e) {
+            // todo tanchuang
+            e.printStackTrace();
+            System.out.println("hahaha");
+        }
     }
 
 }

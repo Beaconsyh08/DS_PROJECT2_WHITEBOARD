@@ -41,6 +41,8 @@ public class ServerTest {
     private ArrayList<JSONObject> canvasShapes;
     private ArrayList<String> userNameArray = new ArrayList<String>();
     private LinkedBlockingQueue<JSONObject> initializeMsg;
+    private String manager = "";
+    private boolean isCreated = false;
 
     /**
      * Create the application.
@@ -365,6 +367,68 @@ public class ServerTest {
                                     }
                                 }
                                 break;
+
+                            case "createBoard":
+                                String userName = ((String) message.get("user_name")).trim();
+                                String isCreatedStr = Boolean.toString(isCreated);
+                                JSONObject jsonStatus = new JSONObject();
+                                jsonStatus.put("method_name", "initialize");
+                                jsonStatus.put("user_name", manager);
+                                jsonStatus.put("txt_message", isCreatedStr);
+                                for (ConnectionToClient clientConnection : clientList) {
+                                    if (clientConnection.getUserName().equals(userName)) {
+                                        clientConnection.parseAndReplyOrigin(jsonStatus);
+                                        break;
+                                    }
+                                }
+                                if (!isCreated) {
+                                    sendUpdateUserList();
+                                }
+
+                                break;
+
+                            case "joinBoard":
+                                String userName2 = ((String) message.get("user_name")).trim();
+                                String isCreatedStr2 = Boolean.toString(isCreated);
+                                JSONObject jsonStatus2 = new JSONObject();
+                                jsonStatus2.put("method_name", "joinBoard");
+                                jsonStatus2.put("user_name", manager);
+                                jsonStatus2.put("txt_message", isCreatedStr2);
+                                if (isCreated == false) {
+                                    for (ConnectionToClient clientConnection : clientList) {
+                                        if (clientConnection.getUserName().equals(userName2)) {
+                                            clientConnection.parseAndReplyOrigin(jsonStatus2);
+                                            break;
+                                        }
+                                    }
+                                } else {
+                                    JSONObject jsonStatus3 = new JSONObject();
+                                    jsonStatus3.put("method_name", "initialize");
+                                    jsonStatus3.put("user_name", userName2);
+                                    jsonStatus3.put("txt_message", "askToJoin");
+                                    for (ConnectionToClient clientConnection : clientList) {
+                                        if (clientConnection.getUserName().equals(manager)) {
+                                            clientConnection.parseAndReplyOrigin(jsonStatus3);
+                                            break;
+                                        }
+                                    }
+                                }
+                                break;
+
+                            case "replyJoin":
+                                String userName3 = ((String) message.get("user_name")).trim();
+                                String answer = ((String) message.get("other")).trim();
+                                JSONObject jsonStatus4 = new JSONObject();
+                                jsonStatus4.put("method_name", "replyJoin");
+                                jsonStatus4.put("user_name", userName3);
+                                jsonStatus4.put("txt_message", "answer");
+                                for (ConnectionToClient clientConnection : clientList) {
+                                    if (clientConnection.getUserName().equals(userName3)) {
+                                        clientConnection.parseAndReplyOrigin(jsonStatus4);
+                                        break;
+                                    }
+                                }
+                                break;
                         }
                     }
                 } catch (InterruptedException e) {
@@ -391,7 +455,22 @@ public class ServerTest {
                                     userNameArray.add(userName);
                                 }
                                 System.out.println(userNameArray);
+//                                sendUpdateUserList();
+                                String isManager = ((String) message.get("other")).trim();
+                                if (isManager.equals("true") || (isManager.equals("True"))) {
+                                    isCreated = true;
+                                    manager = userName;
+                                }
+                                break;
+
+                            case "fullUserList":
                                 sendUpdateUserList();
+                                break;
+
+                            case "setManager":
+                                String userNameMg = ((String) message.get("user_name")).trim();
+                                isCreated = true;
+                                manager = userNameMg;
                                 break;
 
                             case "exit":
@@ -475,7 +554,7 @@ public class ServerTest {
 
     private void updateConnectionList(String userNameExit) {
         ArrayList<ConnectionToClient> newClientList = new ArrayList<ConnectionToClient>();
-        for (int i =clientList.size()-1; i>=0; i--){
+        for (int i = clientList.size() - 1; i >= 0; i--) {
             if (clientList.get(i).getUserName().equals(userNameExit)) {
                 clientList.get(i).setAlive(false);
             }

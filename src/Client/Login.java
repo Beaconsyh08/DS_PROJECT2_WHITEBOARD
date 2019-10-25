@@ -192,8 +192,18 @@ public class Login {
                                 System.out.println("status" +status);
                                 if (status.equals(1L)) {
                                     JOptionPane.showMessageDialog(null, "Welcome, new account created");
-                                    ClientWelcome clientWelcome = new ClientWelcome(username, socket, textFieldIPAddress, textFieldPort);
+                                    UserProfile user = new UserProfile(username, false);
+                                    ClientWelcome clientWelcome = new ClientWelcome(username, socket, textFieldIPAddress, textFieldPort, user);
                                     frame.setVisible(false);
+                                    // reg name to connection
+
+                                    try {
+                                        sendMsg4("system", user.getUserName(), "regUserName", Boolean.toString(user.isManager()));
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    } catch (ParseException e) {
+                                        e.printStackTrace();
+                                    }
                                     break;
                                 } else if (status.equals(4L)) {
                                     JOptionPane.showMessageDialog(null, "User already logged in");
@@ -202,8 +212,18 @@ public class Login {
                                     System.exit(1);
                                 } else if (status.equals(2L)) {
                                     JOptionPane.showMessageDialog(null, "Welcome back!");
-                                    ClientWelcome clientWelcome = new ClientWelcome(username, socket, textFieldIPAddress, textFieldPort);
+                                    UserProfile user = new UserProfile(username, false);
+                                    ClientWelcome clientWelcome = new ClientWelcome(username, socket, textFieldIPAddress, textFieldPort, user);
                                     frame.setVisible(false);
+                                    // reg name to connection
+
+                                    try {
+                                        sendMsg4("system", user.getUserName(), "regUserName", Boolean.toString(user.isManager()));
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    } catch (ParseException e) {
+                                        e.printStackTrace();
+                                    }
                                     break;
                                 } else if (status.equals(3L)) {
                                     JOptionPane.showMessageDialog(null, "Oops, wrong password. Or username already been registered.");
@@ -256,6 +276,26 @@ public class Login {
             jsonWord.put("method_name", method);
             jsonWord.put("user_name", userName);
             jsonWord.put("txt_message", message);
+
+            // Send message to Server
+            dataOutputStream.writeUTF(jsonWord.toJSONString());
+            dataOutputStream.flush();
+        } catch (SocketException e) {
+            // todo tanchuang
+            e.printStackTrace();
+            System.out.println("hahaha");
+        }
+    }
+
+    private void sendMsg4(String method, String userName, String message, String other)
+            throws IOException, ParseException {
+        // Output and Input Stream
+        try {
+            JSONObject jsonWord = new JSONObject();
+            jsonWord.put("method_name", method);
+            jsonWord.put("user_name", userName);
+            jsonWord.put("txt_message", message);
+            jsonWord.put("other", other);
 
             // Send message to Server
             dataOutputStream.writeUTF(jsonWord.toJSONString());
