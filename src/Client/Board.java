@@ -337,7 +337,7 @@ public class Board extends JFrame {
                             } catch (ParseException ex) {
                                 ex.printStackTrace();
                             }
-                            removeAllShapes(shapes);
+//                            removeAllShapes(shapes);
                             file_opened = file;
                             FileInputStream fis = new FileInputStream(file);
                             ObjectInputStream ois = new ObjectInputStream(fis);
@@ -354,7 +354,7 @@ public class Board extends JFrame {
                                 }
                             }
                             System.out.println(shapes.size());
-                            panel_darw.repaint();
+//                            panel_darw.repaint();
                             ois.close();
                         }
                     }
@@ -746,7 +746,7 @@ public class Board extends JFrame {
             // todo tanchuang>>>???
             e.printStackTrace();
             System.out.println("hahaha");
-            JOptionPane.showMessageDialog(null, "Server maybe not start");
+            JOptionPane.showMessageDialog(null, "The server is not active now");
         }
     }
 
@@ -766,7 +766,7 @@ public class Board extends JFrame {
         } catch (SocketException e) {
             // todo tanchuang
             e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Server maybe not start");
+            JOptionPane.showMessageDialog(null, "The server is not active now");
         }
     }
 
@@ -782,7 +782,7 @@ public class Board extends JFrame {
         } catch (SocketException e) {
             // todo tanchuang
             e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Server maybe not start");
+            JOptionPane.showMessageDialog(null, "The server is not active now");
             System.out.println("hahaha");
         }
     }
@@ -862,7 +862,7 @@ public class Board extends JFrame {
         } catch (SocketException e) {
             // todo tanchuang
             e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Server maybe not start");
+            JOptionPane.showMessageDialog(null, "The server is not active now");
             System.out.println("hahaha");
         }
 
