@@ -418,6 +418,10 @@ public class ServerTest {
         System.out.println("connection after delete" + newClientList);
     }
 
+//    private synchronized void addToShapes(ArrayList<Shape> shapes, Shape shape) {
+//        shapes.add(shape);
+//    }
+
 
     private class ConnectionToClient {
         private Socket socket;
@@ -458,7 +462,9 @@ public class ServerTest {
                                         break;
                                     case "draw":
                                         drawMsg.put(jsonObject);
-                                        canvasShapes.add(jsonObject);
+                                        synchronized (canvasShapes) {
+                                            canvasShapes.add(jsonObject);
+                                        }
                                         break;
                                 }
 

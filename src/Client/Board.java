@@ -50,12 +50,12 @@ public class Board extends JFrame {
 
         // set not resizable
         this.setResizable(false);
-        this.addWindowListener( new WindowAdapter() {
+        this.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent we) {
                 try {
                     sendMsg("system", user.getUserName(), "exit");
-                    if (user.isManager()){
-                        for (String user: userList){
+                    if (user.isManager()) {
+                        for (String user : userList) {
                             // todo trytry
                             sendKick("finish", user);
                         }
@@ -231,7 +231,7 @@ public class Board extends JFrame {
                 String kickoutUser = UserList.getSelectedValue();
                 System.out.println(kickoutUser);
                 try {
-                    sendKick("kick",kickoutUser);
+                    sendKick("kick", kickoutUser);
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
@@ -306,7 +306,7 @@ public class Board extends JFrame {
                         ObjectInputStream ois = new ObjectInputStream(fis);
                         shapes1 = (ArrayList<Shape>) ois.readObject();
                         for (int n = 0; n < shapes1.size(); n++) {
-                            shapes.add(shapes1.get(n));
+                            addToShapes(shapes,shapes1.get(n));
                         }
                         System.out.println(shapes.size());
                         panel_darw.repaint();
@@ -482,23 +482,23 @@ public class Board extends JFrame {
                                 switch (type) {
                                     case "Line":
                                         Shape shape = new Shape("Line", x1, y1, x2, y2, color, stroke, "");
-                                        shapes.add(shape);
+                                        addToShapes(shapes,shape);
                                         break;
                                     case "Rectangle":
                                         Shape shape2 = new Shape("Rectangle", x1, y1, x2, y2, color, stroke, "");
-                                        shapes.add(shape2);
+                                        addToShapes(shapes,shape2);
                                         break;
                                     case "Oval":
                                         Shape shape3 = new Shape("Oval", x1, y1, x2, y2, color, stroke, "");
-                                        shapes.add(shape3);
+                                        addToShapes(shapes,shape3);
                                         break;
                                     case "Circle":
                                         Shape shape4 = new Shape("Circle", x1, y1, x2, y2, color, stroke, "");
-                                        shapes.add(shape4);
+                                        addToShapes(shapes,shape4);
                                         break;
                                     case "Text":
                                         Shape shape5 = new Shape("Text", x1, y1, x2, y2, color, stroke, text);
-                                        shapes.add(shape5);
+                                        addToShapes(shapes,shape5);
                                         break;
                                 }
                                 break;
@@ -507,7 +507,7 @@ public class Board extends JFrame {
                                 userList = ((ArrayList<String>) message.get("userList"));
                                 System.out.println("updated userlist " + userList);
                                 userListModel.clear();
-                                for(int i = 0; i < userList.size(); i ++) {
+                                for (int i = 0; i < userList.size(); i++) {
                                     userListModel.addElement(userList.get(i));
                                 }
                                 UserList.setModel(userListModel);
@@ -642,30 +642,34 @@ public class Board extends JFrame {
             case "Line":
                 g2d.drawLine(x1, y1, x2, y2);
                 Shape shape = new Shape("Line", x1, y1, x2, y2, color, strokeInt, "");
-                shapes.add(shape);
+                addToShapes(shapes,shape);
                 break;
             case "Rectangle":
                 g2d.drawRect(Math.min(x2, x1), Math.min(y2, y1), Math.abs(x2 - x1), Math.abs(y1 - y2));
                 Shape shape2 = new Shape("Rectangle", x1, y1, x2, y2, color, strokeInt, "");
-                shapes.add(shape2);
+                addToShapes(shapes,shape2);
                 break;
             case "Oval":
                 g2d.drawOval(Math.min(x2, x1), Math.min(y2, y1), Math.abs(x2 - x1), Math.abs(y1 - y2));
                 Shape shape3 = new Shape("Oval", x1, y1, x2, y2, color, strokeInt, "");
-                shapes.add(shape3);
+                addToShapes(shapes,shape3);
                 break;
             case "Circle":
                 int r = (int) Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
                 g2d.drawOval(x1, y1, r, r);
                 Shape shape4 = new Shape("Circle", x1, y1, x2, y2, color, strokeInt, "");
-                shapes.add(shape4);
+                addToShapes(shapes,shape4);
                 break;
             case "Text":
                 g2d.drawString(text, x1, y1);
                 Shape shape5 = new Shape("Text", x1, y1, x2, y2, color, strokeInt, text);
-                shapes.add(shape5);
+                addToShapes(shapes,shape5);
                 break;
         }
+    }
+
+    private synchronized void addToShapes(ArrayList<Shape> shapes, Shape shape) {
+        shapes.add(shape);
     }
 
     private class ConnectionToServer {
