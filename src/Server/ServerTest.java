@@ -403,6 +403,9 @@ public class ServerTest {
                                     userNameArray.remove(clientConnection.getUserName());
                                     updateConnectionList(clientConnection.getUserName());
                                 }
+                                synchronized (canvasShapes) {
+                                    canvasShapes.removeAll(canvasShapes);
+                                }
                                 break;
 
                             case "newCanvas":
@@ -499,6 +502,7 @@ public class ServerTest {
                                         synchronized (canvasShapes) {
                                             canvasShapes.add(jsonObject);
                                         }
+                                        System.out.println(canvasShapes);
                                         break;
                                     case "initialize":
                                         initializeMsg.put(jsonObject);

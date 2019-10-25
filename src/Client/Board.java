@@ -302,6 +302,13 @@ public class Board extends JFrame {
         btnNewButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                try {
+                    sendMsg("system", user.getUserName(), "openCanvas");
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                } catch (ParseException ex) {
+                    ex.printStackTrace();
+                }
                 ArrayList<Shape> shapes1;
                 panel_darw.repaint();
                 try {
@@ -330,13 +337,7 @@ public class Board extends JFrame {
                         System.out.println(shapes.size());
                         panel_darw.repaint();
                         ois.close();
-                        try {
-                            sendMsg("system", user.getUserName(), "openCanvas");
-                        } catch (IOException ex) {
-                            ex.printStackTrace();
-                        } catch (ParseException ex) {
-                            ex.printStackTrace();
-                        }
+
                     }
                 } catch (Exception e1) {
                     e1.printStackTrace();
