@@ -53,24 +53,24 @@ public class Login {
      */
     private void initialize() {
         frame = new JFrame();
-        frame.setBounds(100, 100, 600, 400);
+        frame.setBounds(100, 100, 450, 400);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.getContentPane().setLayout(null);
 
         userArea = new JTextField();
-        userArea.setBounds(163, 80, 130, 26);
+        userArea.setBounds(233, 88, 130, 26);
         frame.getContentPane().add(userArea);
         userArea.setColumns(10);
 
         passArea = new JPasswordField();
-        passArea.setBounds(163, 117, 130, 26);
+        passArea.setBounds(233, 133, 130, 26);
         frame.getContentPane().add(passArea);
 
         //        private JTextField textFieldPort;
         JTextField textFieldPort = new JTextField();
         textFieldPort.setHorizontalAlignment(SwingConstants.CENTER);
 //        textFieldPort.setFont(new Font("Georgia", Font.PLAIN, 20));
-        textFieldPort.setBounds(163, 154, 130, 26);
+        textFieldPort.setBounds(233, 229, 130, 26);
         textFieldPort.setText("Enter Port");
         textFieldPort.setForeground(Color.GRAY);
         textFieldPort.addFocusListener(new FocusAdapter() {
@@ -114,12 +114,13 @@ public class Login {
                 }
             }
         });
-        textFieldIPAddress.setBounds(163, 191, 130, 26);
+        textFieldIPAddress.setBounds(233, 181, 130, 26);
         frame.getContentPane().add(textFieldIPAddress);
         textFieldIPAddress.setColumns(10);
 
 
         JButton btnLogin = new JButton("Login");
+        btnLogin.setFont(new Font("Georgia", Font.PLAIN, 20));
         btnLogin.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
@@ -251,20 +252,33 @@ public class Login {
 
 
 
-        btnLogin.setBounds(170, 232, 117, 29);
+        btnLogin.setBounds(148, 286, 117, 29);
         frame.getContentPane().add(btnLogin);
 
         JLabel lblUsername = new JLabel("Username:");
-        lblUsername.setBounds(75, 85, 72, 16);
+        lblUsername.setFont(new Font("Georgia", Font.PLAIN, 20));
+        lblUsername.setBounds(74, 88, 149, 22);
         frame.getContentPane().add(lblUsername);
 
         JLabel lblPassword = new JLabel("Password:");
-        lblPassword.setBounds(75, 122, 72, 16);
+        lblPassword.setFont(new Font("Georgia", Font.PLAIN, 20));
+        lblPassword.setBounds(81, 135, 111, 22);
         frame.getContentPane().add(lblPassword);
 
-        JLabel lblCanvas = new JLabel("Canvas");
-        lblCanvas.setBounds(197, 27, 72, 16);
+        JLabel lblCanvas = new JLabel("Whiteboard Login");
+        lblCanvas.setFont(new Font("Georgia", Font.PLAIN, 20));
+        lblCanvas.setBounds(133, 24, 168, 26);
         frame.getContentPane().add(lblCanvas);
+
+        JLabel lblPort = new JLabel("Port Number:");
+        lblPort.setFont(new Font("Georgia", Font.PLAIN, 20));
+        lblPort.setBounds(49, 230, 138, 22);
+        frame.getContentPane().add(lblPort);
+
+        JLabel lblIPAdd = new JLabel("IP Address:");
+        lblIPAdd.setFont(new Font("Georgia", Font.PLAIN, 20));
+        lblIPAdd.setBounds(69, 186, 117, 22);
+        frame.getContentPane().add(lblIPAdd);
 
     }
 

@@ -54,7 +54,7 @@ public class Board extends JFrame {
 
         this.socket = socket;
         this.user = user;
-        this.setSize(1000, 600);
+        this.setSize(1019, 624);
         this.setTitle("Draw Board");
         this.setDefaultCloseOperation(3);
         this.setLocationRelativeTo(null);
@@ -190,7 +190,8 @@ public class Board extends JFrame {
         panelright.setLayout(null);
 
         JLabel lblChat = new JLabel("Chat");
-        lblChat.setBounds(133, 6, 34, 16);
+        lblChat.setFont(new Font("Georgia", Font.PLAIN, 16));
+        lblChat.setBounds(133, 6, 46, 19);
         panelright.add(lblChat);
 
         JScrollPane chatWindowPane = new JScrollPane();
@@ -206,7 +207,8 @@ public class Board extends JFrame {
         panelright.add(messageArea);
 
         JButton btnEnter = new JButton("Enter");
-        btnEnter.setBounds(50, 481, 117, 29);
+        btnEnter.setFont(new Font("Georgia", Font.PLAIN, 16));
+        btnEnter.setBounds(50, 485, 110, 25);
         panelright.add(btnEnter);
         btnEnter.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -240,7 +242,8 @@ public class Board extends JFrame {
 //        UserList.setModel(userListModel);
         scrollUserList.setViewportView(UserList);
 
-        JButton btnKickOut = new JButton("Kick Out");
+        JButton btnKickOut = new JButton("Kick");
+        btnKickOut.setFont(new Font("Georgia", Font.PLAIN, 16));
         btnKickOut.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if (UserList.isSelectionEmpty()) {
@@ -260,7 +263,7 @@ public class Board extends JFrame {
                 }
             }
         });
-        btnKickOut.setBounds(205, 481, 92, 29);
+        btnKickOut.setBounds(212, 485, 80, 25);
         panelright.add(btnKickOut);
 
 
@@ -311,6 +314,7 @@ public class Board extends JFrame {
 
         //open
         JButton btnNewButton = new JButton("Open");
+        btnNewButton.setFont(new Font("Georgia", Font.PLAIN, 16));
         btnNewButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -360,11 +364,12 @@ public class Board extends JFrame {
                 }
             }
         });
-        btnNewButton.setBounds(700, 0, 117, 29);
+        btnNewButton.setBounds(700, 5, 110, 25);
         paneldown.add(btnNewButton);
 
         //save as
         JButton btnNewButton_1 = new JButton("Save as");
+        btnNewButton_1.setFont(new Font("Georgia", Font.PLAIN, 16));
 
         btnNewButton_1.addActionListener(new ActionListener() {
             @Override
@@ -388,11 +393,12 @@ public class Board extends JFrame {
                 }
             }
         });
-        btnNewButton_1.setBounds(877, 0, 117, 29);
+        btnNewButton_1.setBounds(875, 5, 110, 25);
         paneldown.add(btnNewButton_1);
 
         //save
         JButton btnNewButton_2 = new JButton("Save");
+        btnNewButton_2.setFont(new Font("Georgia", Font.PLAIN, 16));
         btnNewButton_2.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -420,11 +426,12 @@ public class Board extends JFrame {
                 }
             }
         });
-        btnNewButton_2.setBounds(700, 31, 117, 29);
+        btnNewButton_2.setBounds(700, 32, 110, 25);
         paneldown.add(btnNewButton_2);
 
         //new
         JButton btnNewButton_3 = new JButton("New");
+        btnNewButton_3.setFont(new Font("Georgia", Font.PLAIN, 16));
         btnNewButton_3.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
 //                removeAllShapes(shapes);
@@ -440,12 +447,12 @@ public class Board extends JFrame {
                 }
             }
         });
-        btnNewButton_3.setBounds(877, 31, 117, 29);
+        btnNewButton_3.setBounds(875, 32, 110, 25);
         paneldown.add(btnNewButton_3);
 
         lblDrawing = new JLabel("Welcome to Shared Whiteboard");
-        lblDrawing.setFont(new Font("Georgia", Font.PLAIN, 14));
-        lblDrawing.setBounds(370, 22, 245, 15);
+        lblDrawing.setFont(new Font("Georgia", Font.PLAIN, 16));
+        lblDrawing.setBounds(370, 22, 266, 15);
         paneldown.add(lblDrawing);
 
         if (!user.isManager()) {

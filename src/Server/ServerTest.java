@@ -84,7 +84,7 @@ public class ServerTest {
      */
     private void initialize() {
         frame = new JFrame();
-        frame.setBounds(100, 100, 500, 600);
+        frame.setBounds(100, 100, 368, 507);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.getContentPane().setLayout(null);
         frame.setTitle("Shared Whiteboard Server");
@@ -114,7 +114,7 @@ public class ServerTest {
 
         JPanel panel = new JPanel();
         panel.setBorder(null);
-        panel.setBounds(0, 0, 355, 459);
+        panel.setBounds(0, 0, 370, 477);
         frame.getContentPane().add(panel);
         panel.setLayout(null);
 
@@ -203,21 +203,6 @@ public class ServerTest {
         txtMsg.setEditable(false);
         txtMsg.setFont(new Font("Georgia", Font.PLAIN, 20));
         scrollMsg.setViewportView(txtMsg);
-
-        JScrollPane scrollBrdList = new JScrollPane();
-        scrollBrdList.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        scrollBrdList.setBounds(371, 44, 329, 415);
-        frame.getContentPane().add(scrollBrdList);
-
-        JTextArea txtBoardList = new JTextArea();
-        txtBoardList.setEditable(false);
-        txtBoardList.setFont(new Font("Georgia", Font.PLAIN, 20));
-        scrollBrdList.setViewportView(txtBoardList);
-
-        JLabel lblRunningWhiteBoard = new JLabel("Running White Board");
-        lblRunningWhiteBoard.setFont(new Font("Georgia", Font.PLAIN, 20));
-        lblRunningWhiteBoard.setBounds(442, 12, 196, 24);
-        frame.getContentPane().add(lblRunningWhiteBoard);
 
 
     }
