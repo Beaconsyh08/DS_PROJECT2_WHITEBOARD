@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.net.Socket;
 
 /**
  * Description
@@ -31,29 +32,29 @@ public class ClientWelcome {
      *
      * @wbp.parser.entryPoint
      */
-    public ClientWelcome(String userName) {
+    public ClientWelcome(String userName, Socket socket) {
         this.userName = userName;
-        initialize();
+        initialize(socket);
         frmWelcomePage.setVisible(true);
     }
 
-    /**
-     * Launch the application.
-     */
-    public static void main(String[] args) {
-        EventQueue.invokeLater(() -> {
-            try {
-                ClientWelcome window = new ClientWelcome("hahaha");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-    }
+//    /**
+//     * Launch the application.
+//     */
+//    public static void main(String[] args) {
+//        EventQueue.invokeLater(() -> {
+//            try {
+//                ClientWelcome window = new ClientWelcome("hahaha");
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        });
+//    }
 
     /**
      * Initialize the contents of the frame.
      */
-    private void initialize() {
+    private void initialize(Socket socket) {
         frmWelcomePage = new JFrame();
         frmWelcomePage.setTitle("Shared Whiteboard");
         frmWelcomePage.getContentPane().setFont(new Font("Georgia", Font.PLAIN, 20));
@@ -180,7 +181,7 @@ public class ClientWelcome {
         btnJoin.addActionListener(e -> {
 //            userName = txtUserName.getText().trim();
             UserProfile user = new UserProfile(userName, false);
-            Board boardClient = new Board(user, textFieldIPAddress, textFieldPort, txtSystemMessage);
+            Board boardClient = new Board(user, textFieldIPAddress, textFieldPort, txtSystemMessage, socket);
             System.out.println("user_name:" + userName);
 
             try {
@@ -207,7 +208,7 @@ public class ClientWelcome {
         btnCreate.addActionListener(e -> {
 //            userName = txtUserName.getText().trim();
             UserProfile user = new UserProfile(userName, true);
-            Board boardClient = new Board(user, textFieldIPAddress, textFieldPort, txtSystemMessage);
+            Board boardClient = new Board(user, textFieldIPAddress, textFieldPort, txtSystemMessage, socket);
             System.out.println("user_name:" + userName);
 
             try {

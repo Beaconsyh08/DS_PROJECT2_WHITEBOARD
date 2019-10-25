@@ -6,10 +6,11 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.sql.*;
+import java.util.List;
 
 public class LoginProcessor {
 
-    public void checkLoginProcessor(JSONObject jsonObject, DBUtils dbUtils, Socket socket) throws SQLException {
+    public void checkLoginProcessor(JSONObject jsonObject, DBUtils dbUtils, Socket socket, List<String> existingUser) throws SQLException {
         String username = (String) jsonObject.get("username");
         String password = (String) jsonObject.get("password");
 
@@ -31,7 +32,7 @@ public class LoginProcessor {
             rs1.last();
             size = rs1.getRow();
         }
-
+        logInStatus = 0;
         if (size == 0) {
             String createUser = "INSERT INTO user (userID, username, managerID, password) VALUE (NULL, '"
                     + username + "' ,NULL, '" + password + "')";
@@ -41,7 +42,11 @@ public class LoginProcessor {
         } else {
             String passw = rs1.getString("password");
             if (passw.equals(password)) {
-                logInStatus = 2;
+                if (existingUser.contains(username)) {
+                    logInStatus = 4;
+                } else {
+                    logInStatus = 2;
+                }
             } else {
                 logInStatus = 3;
             }

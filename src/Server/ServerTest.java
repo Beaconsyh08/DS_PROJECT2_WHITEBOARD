@@ -425,7 +425,7 @@ public class ServerTest {
                                     case "login":
                                         System.out.println(jsonObject.toJSONString());
                                         LoginProcessor loginProcessor = new LoginProcessor();
-                                        loginProcessor.checkLoginProcessor(jsonObject, dbUtils, socket);
+                                        loginProcessor.checkLoginProcessor(jsonObject, dbUtils, socket, userNameArray);
                                         System.out.println(jsonObject.toJSONString());
                                         break;
                                     case "message":

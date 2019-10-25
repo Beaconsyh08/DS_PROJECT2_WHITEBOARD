@@ -124,12 +124,15 @@ public class Login {
                                 System.out.println(status);
                                 if (status.equals(1L)) {
                                     JOptionPane.showMessageDialog(null, "Welcome, new account created");
-                                    ClientWelcome clientWelcome = new ClientWelcome(username);
+                                    ClientWelcome clientWelcome = new ClientWelcome(username, socket);
                                     frame.setVisible(false);
                                     break;
+                                } else if (status.equals(4L)) {
+                                    JOptionPane.showMessageDialog(null, "User already logged in");
+                                    System.exit(1);
                                 } else if (status.equals(2L)) {
                                     JOptionPane.showMessageDialog(null, "Welcome back!");
-                                    ClientWelcome clientWelcome = new ClientWelcome(username);
+                                    ClientWelcome clientWelcome = new ClientWelcome(username, socket);
                                     frame.setVisible(false);
                                     break;
                                 } else if (status.equals(3L)) {

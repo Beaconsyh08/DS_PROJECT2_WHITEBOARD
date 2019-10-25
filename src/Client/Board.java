@@ -40,7 +40,7 @@ public class Board extends JFrame {
 
 
     //initialize
-    public Board(UserProfile user, JTextField textFieldIPAddress, JTextField textFieldPort, JTextArea txtSystemMessage) {
+    public Board(UserProfile user, JTextField textFieldIPAddress, JTextField textFieldPort, JTextArea txtSystemMessage, Socket socket) {
 
         this.user = user;
         this.setSize(1000, 600);
@@ -417,10 +417,10 @@ public class Board extends JFrame {
 //        });
 //    }
 
-    private void clientInitialize(String ipAddress, int portNumber) {
+    private void clientInitialize(String ipAddress, int portNumber, Socket socket) {
 
         try {
-            socket = new Socket(ipAddress, portNumber);
+            this.socket = socket;
             chatMsg = new LinkedBlockingQueue<Object>();
             systemMsg = new LinkedBlockingQueue<Object>();
             drawMsg = new LinkedBlockingQueue<Object>();
@@ -577,7 +577,7 @@ public class Board extends JFrame {
         String ipAddress = textFieldIPAddress.getText();
         if (portStr.equals("") || (portStr.equals("Enter Port"))) {
             portNumber = 2019;
-            clientInitialize(ipAddress, portNumber);
+            clientInitialize(ipAddress, portNumber, socket);
         } else {
             portNumber = Integer.parseInt(portStr);
             if ((portNumber < 1025) || (portNumber > 65536)) {
@@ -585,7 +585,7 @@ public class Board extends JFrame {
                 textFieldPort.setForeground(Color.GRAY);
                 throw new InvalidPortNumberException();
             } else {
-                clientInitialize(ipAddress, portNumber);
+                clientInitialize(ipAddress, portNumber, socket);
             }
         }
     }
