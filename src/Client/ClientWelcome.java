@@ -13,6 +13,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Description
@@ -25,21 +26,22 @@ import java.net.SocketException;
 public class ClientWelcome {
     private String userName;
     private JFrame frmWelcomePage;
-    //    private JTextField textFieldPort;
     private JLabel lblNewLabel;
     private JScrollPane scrollPane;
     private JTextArea txtSystemMessage;
-    //    private JTextField textFieldIPAddress;
-//    private JLabel lblUserName;
-//    private JTextField txtUserName;
     private JButton btnCreate;
-    //    private String userName;
     private DataOutputStream outputToServer;
     private DataInputStream inputFromServer;
     private JSONParser jsonParser = new JSONParser();
-    private String isCreatedStr;
+    private boolean isCreatedStr ;
     private UserProfile user;
-    private String answer;
+    private boolean answer ;
+    private boolean isCreatedJoin ;
+    private boolean closeThread = true;
+    private JButton btnJoin;
+    private String method;
+    private boolean joinResult;
+    private boolean createResult;
 
     /**
      * Create the application.
@@ -52,19 +54,6 @@ public class ClientWelcome {
         initialize(socket, ip, port);
         frmWelcomePage.setVisible(true);
     }
-
-//    /**
-//     * Launch the application.
-//     */
-//    public static void main(String[] args) {
-//        EventQueue.invokeLater(() -> {
-//            try {
-//                ClientWelcome window = new ClientWelcome("hahaha");
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        });
-//    }
 
     /**
      * Initialize the contents of the frame.
@@ -107,53 +96,78 @@ public class ClientWelcome {
                 + "\n" + "Don't join before board exist.");
         scrollPane.setViewportView(txtSystemMessage);
 
+        try {
+            inputFromServer = new DataInputStream(socket.getInputStream());
+            outputToServer = new DataOutputStream(socket.getOutputStream());
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+//        JSONParser jsonParser = new JSONParser();
+//
+//        Thread read = new Thread() {
+//            public void run() {
+//                while (closeThread) {
+//                    try {
+//                        if (inputFromServer.available() > 0) {
+//                            JSONObject jsonObject = (JSONObject) jsonParser.parse(inputFromServer.readUTF());
+//                            method = ((String) jsonObject.get("method_name")).trim();
+//                            System.out.println("raw json" + jsonObject);
+//                            System.out.println(method);
+//                            switch (method) {
+//                                case "joinBoard":
+//                                    System.out.println(1);
+//                                    String result = ((String) jsonObject.get("txt_message")).trim();
+//                                    isCreatedJoin = result.equals("true");
+//                                    break;
+//                                case "replyJoin":
+//                                    System.out.println(2);
+//                                    String result2 = ((String) jsonObject.get("txt_message")).trim();
+//                                    answer = result2.equals("true");
+//                                    break;
+//
+//                                case "createBoard":
+//                                    System.out.println(3);
+//                                    String result3 = ((String) jsonObject.get("txt_message")).trim();
+//                                    System.out.println("result3" +result3);
+//                                    isCreatedStr = result3.equals("true");
+//                                    System.out.println("isCreatedstr changed or not " +isCreatedStr);
+//                                    break;
+//                            }
+//                        }
+//                    } catch (IOException | ParseException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }
+//        };
+//        read.setDaemon(true);
+//        read.start();
+
         // CONNECT BUTTON: connect to the server and go to next window if connected
-        JButton btnJoin = new JButton("Join");
+        btnJoin = new JButton("Join");
         btnJoin.setToolTipText("Join an existing white board");
 
         btnJoin.addActionListener(e -> {
+//            txtSystemMessage.setText("Please Waiting......");
 
             try {
-                outputToServer = new DataOutputStream(socket.getOutputStream());
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-            try {
-                sendMsg("initialize", userName, "joinBoard");
+//                sendMsg("initialize", userName, "joinBoard");
+                joinResult = readAndSendJSONToServer("initialize", userName, "joinBoard");
             } catch (IOException ex) {
                 ex.printStackTrace();
             } catch (ParseException ex) {
                 ex.printStackTrace();
             }
-            try {
-                inputFromServer = new DataInputStream(socket.getInputStream());
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-
-            try {
-                JSONObject jsonObject = (JSONObject) jsonParser.parse(inputFromServer.readUTF());
-                System.out.println(jsonObject);
-                String method_command = ((String) jsonObject.get("method_name")).trim();
 
 
-                answer = ((String) jsonObject.get("txt_message")).trim();
-
-
-                System.out.println(jsonObject);
-            } catch (ParseException ex) {
-                ex.printStackTrace();
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-
-            if (answer.equals("false")) {
-                JOptionPane.showMessageDialog(null, "Board is not exists, please create or wait");
+            System.out.println("joinResult" + joinResult);
+            System.out.println(joinResult);
+            if (!joinResult) {
+                JOptionPane.showMessageDialog(null, "Board is not exists or Manager refuse your request!");
             } else {
-
-
 //            userName = txtUserName.getText().trim();
-
+                closeThread = false;
                 Board boardClient = new Board(user, ip, port, txtSystemMessage, socket);
                 System.out.println("user_name:" + userName);
 
@@ -181,40 +195,28 @@ public class ClientWelcome {
         btnCreate.setBounds(409, 393, 150, 50);
         btnCreate.addActionListener(e -> {
 //            userName = txtUserName.getText().trim();
+
             try {
-                outputToServer = new DataOutputStream(socket.getOutputStream());
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-            try {
-                sendMsg("initialize", userName, "createBoard");
+//                sendMsg("initialize", userName, "createBoard");
+                createResult = readAndSendJSONToServer("initialize", userName, "createBoard");
             } catch (IOException ex) {
                 ex.printStackTrace();
             } catch (ParseException ex) {
                 ex.printStackTrace();
             }
 
-            try {
-                inputFromServer = new DataInputStream(socket.getInputStream());
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
+//            try {
+//                TimeUnit.SECONDS.sleep(1);
+//            } catch (InterruptedException ex) {
+//                ex.printStackTrace();
+//            }
 
-            try {
-                JSONObject jsonObject = (JSONObject) jsonParser.parse(inputFromServer.readUTF());
-                isCreatedStr = ((String) jsonObject.get("txt_message")).trim();
-                System.out.println(jsonObject);
-            } catch (ParseException ex) {
-                ex.printStackTrace();
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-
-
-            System.out.println(isCreatedStr);
-            if (isCreatedStr.equals("false")) {
+            System.out.println("createResult" + createResult);
+            System.out.println(!createResult);
+            if (!createResult) {
                 //todo here
                 user.setManager(true);
+                closeThread = false;
                 Board boardClient = new Board(user, ip, port, txtSystemMessage, socket);
                 System.out.println("user_name:" + userName);
 
@@ -269,26 +271,26 @@ public class ClientWelcome {
         }
     }
 
-    private void sendMsg4(String method, String userName, String message, String other)
+    private Boolean readAndSendJSONToServer(String method, String userName, String txtMessage)
             throws IOException, ParseException {
         // Output and Input Stream
-        try {
-            JSONObject jsonWord = new JSONObject();
-            jsonWord.put("method_name", method);
-            jsonWord.put("user_name", userName);
-            jsonWord.put("txt_message", message);
-            jsonWord.put("other", other);
 
-            // Send message to Server
-            outputToServer.writeUTF(jsonWord.toJSONString());
-            outputToServer.flush();
-        } catch (SocketException e) {
-            // todo tanchuang
-            e.printStackTrace();
-            System.out.println("hahaha");
-        }
+        JSONObject jsonWord = new JSONObject();
+        jsonWord.put("method_name", method);
+        jsonWord.put("user_name", userName);
+        jsonWord.put("txt_message", txtMessage);
+
+        // Send message to Server
+        outputToServer.writeUTF(jsonWord.toJSONString());
+        outputToServer.flush();
+
+        // Read the feedback
+        JSONParser jsonParser = new JSONParser();
+        JSONObject jsonObject = (JSONObject) jsonParser.parse(inputFromServer.readUTF());
+        String resultStr = ((String) jsonObject.get("txt_message")).trim();
+        // Append to the text area
+        return resultStr.equals("true");
     }
-
 }
 
 

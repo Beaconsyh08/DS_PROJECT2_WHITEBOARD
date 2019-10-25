@@ -143,7 +143,7 @@ public class Login {
                 if (username.equals("")) {
                     JOptionPane.showMessageDialog(null, "Fail: no username entered.");
                 } else if (password.equals("")) {
-                    JOptionPane.showMessageDialog(null, "Fail: no passowrd entered.");
+                    JOptionPane.showMessageDialog(null, "Fail: no password entered.");
                 } else if (!username.equals("") && !password.equals("")) {
                     try {
                         dataOutputStream = new DataOutputStream(socket.getOutputStream());

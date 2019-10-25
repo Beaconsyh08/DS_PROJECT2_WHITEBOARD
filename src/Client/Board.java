@@ -568,11 +568,24 @@ public class Board extends JFrame {
                             case "askToJoin":
                                 JSONObject jsonJoin = (JSONObject) message.get("shape");
                                 String joiner = ((String) message.get("user_name")).trim();
-
+                                if (JOptionPane.showConfirmDialog(null, joiner+" want to join the board", "WARNING",
+                                        JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+//                                        sendMsg("replyJoin", user.getUserName(), "true");
+                                        sendMsg4("initialize", user.getUserName(), "replyJoin", "true");
+                                    // yes option
+                                } else {
+                                    // no option
+//                                    sendMsg("replyJoin", user.getUserName(), "false");
+                                    sendMsg4("initialize", user.getUserName(), "replyJoin", "false");
+                                }
                                 break;
                         }
 
                     } catch (InterruptedException e) {
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 }
             }
@@ -708,12 +721,13 @@ public class Board extends JFrame {
     private void sendMsg(String method, String userName, String message)
             throws IOException, ParseException {
         // Output and Input Stream
+
         try {
             JSONObject jsonWord = new JSONObject();
             jsonWord.put("method_name", method);
             jsonWord.put("user_name", userName);
             jsonWord.put("txt_message", message);
-
+            System.out.println("sent json" + jsonWord);
             // Send message to Server
             outputToServer.writeUTF(jsonWord.toJSONString());
             outputToServer.flush();

@@ -43,6 +43,7 @@ public class ServerTest {
     private LinkedBlockingQueue<JSONObject> initializeMsg;
     private String manager = "";
     private boolean isCreated = false;
+    private String userName2;
 
     /**
      * Create the application.
@@ -291,26 +292,6 @@ public class ServerTest {
                 }
             }).start();
 
-            //todo 只给来的人发
-            // login thread
-//            new Thread(() -> {
-//                try {
-//                    while (true) {
-//                        JSONObject message = new JSONObject();
-//                        message.put("status", logInStatus);
-//                        System.out.println("Message Received: " + message);
-//
-//                        for (ConnectionToClient clientConnection : clientList) {
-//                            clientConnection.parseAndReplyOrigin(message);
-//                            System.out.println(message);
-//                        }
-//
-//                    }
-//                } catch (IOException ex) {
-//                    ex.printStackTrace();
-//                }
-//            }).start();
-
             // chat message thread
             new Thread(() -> {
                 try {
@@ -372,7 +353,7 @@ public class ServerTest {
                                 String userName = ((String) message.get("user_name")).trim();
                                 String isCreatedStr = Boolean.toString(isCreated);
                                 JSONObject jsonStatus = new JSONObject();
-                                jsonStatus.put("method_name", "initialize");
+                                jsonStatus.put("method_name", "createBoard");
                                 jsonStatus.put("user_name", manager);
                                 jsonStatus.put("txt_message", isCreatedStr);
                                 for (ConnectionToClient clientConnection : clientList) {
@@ -388,7 +369,7 @@ public class ServerTest {
                                 break;
 
                             case "joinBoard":
-                                String userName2 = ((String) message.get("user_name")).trim();
+                                userName2 = ((String) message.get("user_name")).trim();
                                 String isCreatedStr2 = Boolean.toString(isCreated);
                                 JSONObject jsonStatus2 = new JSONObject();
                                 jsonStatus2.put("method_name", "joinBoard");
@@ -421,9 +402,10 @@ public class ServerTest {
                                 JSONObject jsonStatus4 = new JSONObject();
                                 jsonStatus4.put("method_name", "replyJoin");
                                 jsonStatus4.put("user_name", userName3);
-                                jsonStatus4.put("txt_message", "answer");
+                                jsonStatus4.put("txt_message", answer);
+                                System.out.println("replyjson" + jsonStatus4);
                                 for (ConnectionToClient clientConnection : clientList) {
-                                    if (clientConnection.getUserName().equals(userName3)) {
+                                    if (clientConnection.getUserName().equals(userName2)) {
                                         clientConnection.parseAndReplyOrigin(jsonStatus4);
                                         break;
                                     }
@@ -436,7 +418,6 @@ public class ServerTest {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
 
             }).start();
 
@@ -502,6 +483,8 @@ public class ServerTest {
                                 break;
 
                             case "finish":
+                                isCreated = false;
+                                manager ="";
                                 JSONObject finishJSON = new JSONObject();
                                 finishJSON.put("method_name", "system");
                                 finishJSON.put("txt_message", "finish");
