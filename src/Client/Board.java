@@ -8,10 +8,15 @@ import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -38,6 +43,9 @@ public class Board extends JFrame {
     private ArrayList<String> userList;
     private DefaultListModel<String> userListModel = new DefaultListModel<String>();
     private JList<String> UserList = new JList<String>();
+    private JLabel lblDrawing;
+    private LocalDateTime time1 = LocalDateTime.now();
+    private LocalDateTime time2 = LocalDateTime.now();
 
 
     //initialize
@@ -229,16 +237,14 @@ public class Board extends JFrame {
         JButton btnKickOut = new JButton("Kick Out");
         btnKickOut.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                if(UserList.isSelectionEmpty()){
+                if (UserList.isSelectionEmpty()) {
                     JOptionPane.showMessageDialog(null, "Please Select a User!");
-                }
-                else{
+                } else {
                     String kickoutUser = UserList.getSelectedValue();
                     System.out.println(kickoutUser);
-                    if(kickoutUser.equals(user.getUserName())){
+                    if (kickoutUser.equals(user.getUserName())) {
                         JOptionPane.showMessageDialog(null, "You cannot kick out the manager!");
-                    }
-                    else{
+                    } else {
                         try {
                             sendKick("kick", kickoutUser);
                         } catch (IOException ex) {
@@ -426,6 +432,10 @@ public class Board extends JFrame {
         btnNewButton_3.setBounds(877, 31, 117, 29);
         paneldown.add(btnNewButton_3);
 
+        lblDrawing = new JLabel("Welcome to Shared Whiteboard");
+        lblDrawing.setFont(new Font("Georgia", Font.PLAIN, 14));
+        lblDrawing.setBounds(370, 22, 245, 15);
+        paneldown.add(lblDrawing);
 
         if (!user.isManager()) {
             btnKickOut.setEnabled(false);
@@ -557,7 +567,6 @@ public class Board extends JFrame {
         initializeHandling.start();
 
 
-
         Thread systemHandling = new Thread() {
             public void run() {
                 while (true) {
@@ -626,9 +635,20 @@ public class Board extends JFrame {
                     if (drawMsg.size() > 0) {
                         try {
                             JSONObject message = (JSONObject) drawMsg.take();
+                            String drawerName = (String) message.get("user_name");
+                            lblDrawing.setText(drawerName + " is drawing...");
                             Graphics gd = panel_darw.getGraphics();
                             parseAndDraw(message, gd);
+                            time1 = LocalDateTime.now();
                         } catch (InterruptedException e) {
+                        }
+                    } else if (drawMsg.size() == 0) {
+                        time2 = LocalDateTime.now();
+//                        LocalDateTime time1 = null;
+                        long elapsedMinutes = Duration.between(time1, time2).toMillis();
+                        System.out.println(elapsedMinutes);
+                        if (elapsedMinutes > 500) {
+                            lblDrawing.setText("Welcome to Shared Whiteboard");
                         }
                     }
                 }
