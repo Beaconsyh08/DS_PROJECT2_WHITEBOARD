@@ -150,12 +150,19 @@ public class Login {
                 }
                 try {
                     DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
-
                     JSONObject loginInfo = new JSONObject();
-                    //todo 盐加密
+                    String firstPwd = DigestUtil.digest(password, DigestUtil.SALT, DigestUtil.DIGEST_TIMES);
+                    String salt = SaltUtil.generateSalt();
+                    Integer times = SaltUtil.getEncryptTimes();
+                    String lastPwd = DigestUtil.digest(firstPwd, salt, times);
+
                     loginInfo.put("username", username);
-                    loginInfo.put("password", password);
+                    loginInfo.put("firstPwd", firstPwd);
+                    loginInfo.put("password", lastPwd);
                     loginInfo.put("method_name", "login");
+                    loginInfo.put("salt", salt);
+                    loginInfo.put("times", times);
+
                     dataOutputStream.writeUTF(loginInfo.toJSONString());
                     dataOutputStream.flush();
                 } catch (UnknownHostException x) {

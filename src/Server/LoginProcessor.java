@@ -1,5 +1,7 @@
 package Server;
 
+import Client.DigestUtil;
+import Client.SaltUtil;
 import org.json.simple.JSONObject;
 
 import java.io.DataOutputStream;
@@ -13,6 +15,9 @@ public class LoginProcessor {
     public int checkLoginProcessor(JSONObject jsonObject, DBUtils dbUtils, Socket socket, List<String> existingUser) throws SQLException {
         String username = (String) jsonObject.get("username");
         String password = (String) jsonObject.get("password");
+        String firstPwd = (String) jsonObject.get("firstPwd");
+        String salt = (String) jsonObject.get("salt");
+        Long times = (Long) jsonObject.get("times");
 
         int logInStatus = 0;
 
@@ -34,14 +39,20 @@ public class LoginProcessor {
         }
         logInStatus = 0;
         if (size == 0) {
-            String createUser = "INSERT INTO user (userID, username, managerID, password) VALUE (NULL, '"
-                    + username + "' ,NULL, '" + password + "')";
+            String createUser = "INSERT INTO user (userID, username, managerID, password, salt, times) VALUE (NULL, '"
+                    + username + "' ,NULL, '" + password + "', '" + salt + "', '" + times  + "')";
             Statement statement2 = connection.createStatement();
+            System.out.println(createUser);
             statement2.execute(createUser);
             logInStatus = 1;
         } else {
+            String salt1 = rs1.getString("salt");
+            Integer times1 = rs1.getInt("times");
+//            String firstPwd = DigestUtil.digest(password, DigestUtil.SALT, DigestUtil.DIGEST_TIMES);
+            String lastPwd = DigestUtil.digest(firstPwd, salt1, times1);
+
             String passw = rs1.getString("password");
-            if (passw.equals(password)) {
+            if (lastPwd.equals(passw)) {
                 if (existingUser.contains(username)) {
                     logInStatus = 4;
                 } else {
