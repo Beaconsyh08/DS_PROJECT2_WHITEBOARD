@@ -10,7 +10,7 @@ import java.util.List;
 
 public class LoginProcessor {
 
-    public void checkLoginProcessor(JSONObject jsonObject, DBUtils dbUtils, Socket socket, List<String> existingUser) throws SQLException {
+    public int checkLoginProcessor(JSONObject jsonObject, DBUtils dbUtils, Socket socket, List<String> existingUser) throws SQLException {
         String username = (String) jsonObject.get("username");
         String password = (String) jsonObject.get("password");
 
@@ -71,6 +71,7 @@ public class LoginProcessor {
                 ex.printStackTrace();
             }
         }).start();
+        return logInStatus;
     }
 
 }

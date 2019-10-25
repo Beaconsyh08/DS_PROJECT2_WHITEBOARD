@@ -425,7 +425,21 @@ public class ServerTest {
                                     case "login":
                                         System.out.println(jsonObject.toJSONString());
                                         LoginProcessor loginProcessor = new LoginProcessor();
-                                        loginProcessor.checkLoginProcessor(jsonObject, dbUtils, socket, userNameArray);
+                                        int status = loginProcessor.checkLoginProcessor(jsonObject, dbUtils, socket, userNameArray);
+                                        if (status == 4 | status == 3 | status == 1) {
+                                            String username = (String) jsonObject.get("username");
+                                            ArrayList<ConnectionToClient> newClientList = new ArrayList<>();
+                                            for (ConnectionToClient clientConnection : clientList) {
+                                                if (clientConnection.getUserName().equals(username)) {
+                                                    clientConnection.setAlive(false);
+                                                }
+                                                if (clientConnection.isAlive) {
+                                                    newClientList.add(clientConnection);
+                                                }
+                                            }
+                                            clientList = newClientList;
+                                            System.out.println("connection after delete" + newClientList);
+                                        }
                                         System.out.println(jsonObject.toJSONString());
                                         break;
                                     case "message":
