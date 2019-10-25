@@ -235,10 +235,15 @@ public class Board extends JFrame {
                 else{
                     String kickoutUser = UserList.getSelectedValue();
                     System.out.println(kickoutUser);
-                    try {
-                        sendKick("kick", kickoutUser);
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
+                    if(kickoutUser.equals(user.getUserName())){
+                        JOptionPane.showMessageDialog(null, "You cannot kick out the manager!");
+                    }
+                    else{
+                        try {
+                            sendKick("kick", kickoutUser);
+                        } catch (IOException ex) {
+                            ex.printStackTrace();
+                        }
                     }
                 }
             }
