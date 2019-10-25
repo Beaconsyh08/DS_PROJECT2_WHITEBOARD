@@ -42,6 +42,7 @@ public class Board extends JFrame {
     //initialize
     public Board(UserProfile user, JTextField textFieldIPAddress, JTextField textFieldPort, JTextArea txtSystemMessage, Socket socket) {
 
+        this.socket = socket;
         this.user = user;
         this.setSize(1000, 600);
         this.setTitle("Draw Board");
@@ -420,7 +421,7 @@ public class Board extends JFrame {
     private void clientInitialize(String ipAddress, int portNumber, Socket socket) {
 
         try {
-            this.socket = socket;
+//            this.socket = socket;
             chatMsg = new LinkedBlockingQueue<Object>();
             systemMsg = new LinkedBlockingQueue<Object>();
             drawMsg = new LinkedBlockingQueue<Object>();
