@@ -118,22 +118,25 @@ public class Login {
         frame.getContentPane().add(textFieldIPAddress);
         textFieldIPAddress.setColumns(10);
 
-        try {
-            socket = new Socket(ipAddress, port);
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, "Fail: server not found.");
-            System.exit(1);
-            e.printStackTrace();
-        }
 
         JButton btnLogin = new JButton("Login");
         btnLogin.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-            }
-        });
-        btnLogin.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
+                try {
+                    String portStr = textFieldPort.getText();
+                    if (portStr.equals("") || (portStr.equals("Enter Port"))) {
+                        port = 2019;
+                    } else {
+                        port = Integer.parseInt(portStr);
+                    }
+                    ipAddress = textFieldIPAddress.getText();
+                    socket = new Socket(ipAddress, port);
+                } catch (IOException e2) {
+                    JOptionPane.showMessageDialog(null, "Fail: server not found.");
+                    System.exit(1);
+                    e2.printStackTrace();
+                }
+
                 String username = userArea.getText();
                 String password = String.valueOf(passArea.getPassword());
                 //check test area
@@ -141,7 +144,7 @@ public class Login {
                     JOptionPane.showMessageDialog(null, "Fail: no username entered.");
                 } else if (password.equals("")) {
                     JOptionPane.showMessageDialog(null, "Fail: no passowrd entered.");
-                } else if (!username.equals("") && !password.equals("")){
+                } else if (!username.equals("") && !password.equals("")) {
                     try {
                         dataOutputStream = new DataOutputStream(socket.getOutputStream());
                         JSONObject loginInfo = new JSONObject();
@@ -186,7 +189,7 @@ public class Login {
                                 JSONObject tmp = (JSONObject) jsonParser.parse(dataInputStream.readUTF());
                                 Long status = (Long) tmp.get("status");
 
-                                System.out.println(status);
+                                System.out.println("status" +status);
                                 if (status.equals(1L)) {
                                     JOptionPane.showMessageDialog(null, "Welcome, new account created");
                                     ClientWelcome clientWelcome = new ClientWelcome(username, socket, textFieldIPAddress, textFieldPort);
@@ -225,6 +228,7 @@ public class Login {
                 thread.start();
             }
         });
+
 
 
         btnLogin.setBounds(170, 232, 117, 29);

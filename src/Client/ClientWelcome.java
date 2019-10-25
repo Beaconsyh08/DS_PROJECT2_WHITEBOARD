@@ -137,10 +137,10 @@ public class ClientWelcome {
                 + "\n" + "If IP Address is not entered." + "\n" + "The default IP Address: 127.0.0.1 will be used.");
         scrollPane.setViewportView(txtSystemMessage);
 
-        JLabel lblIPAdress = new JLabel("IP ADDRESS:");
-        lblIPAdress.setFont(new Font("Georgia", Font.PLAIN, 20));
-        lblIPAdress.setBounds(82, 260, 130, 50);
-        frmWelcomePage.getContentPane().add(lblIPAdress);
+//        JLabel lblIPAdress = new JLabel("IP ADDRESS:");
+//        lblIPAdress.setFont(new Font("Georgia", Font.PLAIN, 20));
+//        lblIPAdress.setBounds(82, 260, 130, 50);
+//        frmWelcomePage.getContentPane().add(lblIPAdress);
 
         //todo delete
 //        lblUserName = new JLabel("USERNAME: ");
@@ -195,7 +195,7 @@ public class ClientWelcome {
                 txtSystemMessage.setForeground(Color.RED);
             }
         });
-        btnJoin.setBackground(new Color(51, 255, 0));
+        btnJoin.setBackground(new Color(255, 242, 68));
         btnJoin.setFont(new Font("Georgia", Font.PLAIN, 20));
         btnJoin.setBounds(146, 393, 150, 50);
         frmWelcomePage.getContentPane().add(btnJoin);
@@ -203,7 +203,7 @@ public class ClientWelcome {
         btnCreate = new JButton("Create");
         btnCreate.setToolTipText("Create a new white board");
         btnCreate.setFont(new Font("Georgia", Font.PLAIN, 20));
-        btnCreate.setBackground(new Color(51, 255, 0));
+        btnCreate.setBackground(new Color(255, 41, 30));
         btnCreate.setBounds(409, 393, 150, 50);
         btnCreate.addActionListener(e -> {
 //            userName = txtUserName.getText().trim();
