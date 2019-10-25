@@ -39,6 +39,7 @@ public class ClientWelcome {
     private JSONParser jsonParser = new JSONParser();
     private String isCreatedStr;
     private UserProfile user;
+    private String answer;
 
     /**
      * Create the application.
@@ -88,62 +89,6 @@ public class ClientWelcome {
             }
         });
 
-//        JLabel lblPort = new JLabel("PORT:");
-//        lblPort.setFont(new Font("Georgia", Font.PLAIN, 20));
-//        lblPort.setBounds(415, 260, 60, 50);
-//        frmWelcomePage.getContentPane().add(lblPort);
-
-//        textFieldPort = new JTextField();
-//        textFieldPort.setHorizontalAlignment(SwingConstants.CENTER);
-//        textFieldPort.setFont(new Font("Georgia", Font.PLAIN, 20));
-//        textFieldPort.setBounds(487, 265, 130, 40);
-//        textFieldPort.setText("Enter Port");
-//        textFieldPort.setForeground(Color.GRAY);
-//        textFieldPort.addFocusListener(new FocusAdapter() {
-//            @Override
-//            public void focusGained(FocusEvent e) {
-//                if (textFieldPort.getText().trim().equals("Enter Port")) {
-//                    textFieldPort.setText("");
-//                    textFieldPort.setForeground(Color.BLACK);
-//                }
-//            }
-//
-//            @Override
-//            public void focusLost(FocusEvent e) {
-//                if (textFieldPort.getText().trim().equals("")) {
-//                    textFieldPort.setText("Enter Port");
-//                    textFieldPort.setForeground(Color.GRAY);
-//                }
-//            }
-//        });
-//        frmWelcomePage.getContentPane().add(textFieldPort);
-//        textFieldPort.setColumns(10);
-
-//        textFieldIPAddress = new JTextField();
-//        textFieldIPAddress.setHorizontalAlignment(SwingConstants.CENTER);
-//        textFieldIPAddress.setFont(new Font("Georgia", Font.PLAIN, 20));
-//        textFieldIPAddress.setText("127.0.0.1");
-//        textFieldIPAddress.addFocusListener(new FocusAdapter() {
-//            @Override
-//            public void focusGained(FocusEvent e) {
-//                if (textFieldIPAddress.getText().trim().equals("127.0.0.1")) {
-//                    textFieldIPAddress.setText("");
-//                    textFieldIPAddress.setForeground(Color.BLACK);
-//                }
-//            }
-//
-//            @Override
-//            public void focusLost(FocusEvent e) {
-//                if (textFieldIPAddress.getText().trim().equals("")) {
-//                    textFieldIPAddress.setText("127.0.0.1");
-//                    textFieldIPAddress.setForeground(Color.GRAY);
-//                }
-//            }
-//        });
-//        textFieldIPAddress.setBounds(224, 265, 158, 40);
-//        frmWelcomePage.getContentPane().add(textFieldIPAddress);
-//        textFieldIPAddress.setColumns(10);
-
         lblNewLabel = new JLabel("Welcome to the Shared Whiteboard");
         lblNewLabel.setForeground(new Color(0, 0, 102));
         lblNewLabel.setFont(new Font("Dialog", Font.PLAIN, 26));
@@ -161,44 +106,6 @@ public class ClientWelcome {
         txtSystemMessage.setText("You could join after manager approval." + "\n" + "You could create a board if there is no board exist."
                 + "\n" + "Don't join before board exist.");
         scrollPane.setViewportView(txtSystemMessage);
-
-//        JLabel lblIPAdress = new JLabel("IP ADDRESS:");
-//        lblIPAdress.setFont(new Font("Georgia", Font.PLAIN, 20));
-//        lblIPAdress.setBounds(82, 260, 130, 50);
-//        frmWelcomePage.getContentPane().add(lblIPAdress);
-
-        //todo delete
-//        lblUserName = new JLabel("USERNAME: ");
-//        lblUserName.setFont(new Font("Georgia", Font.PLAIN, 20));
-//        lblUserName.setBounds(89, 322, 130, 50);
-//        frmWelcomePage.getContentPane().add(lblUserName);
-//
-//        txtUserName = new JTextField();
-//        txtUserName.setForeground(Color.GRAY);
-//        txtUserName.setText("Enter A Username");
-//        txtUserName.addFocusListener(new FocusAdapter() {
-//            @Override
-//            public void focusGained(FocusEvent e) {
-//                if (txtUserName.getText().trim().equals("Enter A Username")) {
-//                    txtUserName.setText("");
-//                    txtUserName.setForeground(Color.BLACK);
-//                }
-//            }
-//
-//            @Override
-//            public void focusLost(FocusEvent e) {
-//                if (txtUserName.getText().trim().equals("")) {
-//                    txtUserName.setText("Enter A Username");
-//                    txtUserName.setForeground(Color.GRAY);
-//                }
-//            }
-//        });
-//
-//        txtUserName.setHorizontalAlignment(SwingConstants.CENTER);
-//        txtUserName.setFont(new Font("Georgia", Font.PLAIN, 20));
-//        txtUserName.setColumns(10);
-//        txtUserName.setBounds(228, 327, 389, 40);
-//        frmWelcomePage.getContentPane().add(txtUserName);
 
         // CONNECT BUTTON: connect to the server and go to next window if connected
         JButton btnJoin = new JButton("Join");
@@ -224,21 +131,42 @@ public class ClientWelcome {
                 ex.printStackTrace();
             }
 
+            try {
+                JSONObject jsonObject = (JSONObject) jsonParser.parse(inputFromServer.readUTF());
+                System.out.println(jsonObject);
+                String method_command = ((String) jsonObject.get("method_name")).trim();
+
+
+                answer = ((String) jsonObject.get("txt_message")).trim();
+
+
+                System.out.println(jsonObject);
+            } catch (ParseException ex) {
+                ex.printStackTrace();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+
+            if (answer.equals("false")) {
+                JOptionPane.showMessageDialog(null, "Board is not exists, please create or wait");
+            } else {
+
 
 //            userName = txtUserName.getText().trim();
 
-            Board boardClient = new Board(user, ip, port, txtSystemMessage, socket);
-            System.out.println("user_name:" + userName);
+                Board boardClient = new Board(user, ip, port, txtSystemMessage, socket);
+                System.out.println("user_name:" + userName);
 
-            try {
-                if (boardClient.socket.isConnected()) {
-                    System.out.println("True");
-                    boardClient.setVisible(true);
-                    frmWelcomePage.setVisible(false);
+                try {
+                    if (boardClient.socket.isConnected()) {
+                        System.out.println("True");
+                        boardClient.setVisible(true);
+                        frmWelcomePage.setVisible(false);
+                    }
+                } catch (NullPointerException ex) {
+                    txtSystemMessage.setText("Make sure server is on!" + "\n" + "Make sure correct port and IP Address are entered! ");
+                    txtSystemMessage.setForeground(Color.RED);
                 }
-            } catch (NullPointerException ex) {
-                txtSystemMessage.setText("Make sure server is on!" + "\n" + "Make sure correct port and IP Address are entered! ");
-                txtSystemMessage.setForeground(Color.RED);
             }
         });
         btnJoin.setBackground(new Color(255, 242, 68));

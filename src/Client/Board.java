@@ -564,6 +564,12 @@ public class Board extends JFrame {
                                         break;
                                 }
                                 break;
+
+                            case "askToJoin":
+                                JSONObject jsonJoin = (JSONObject) message.get("shape");
+                                String joiner = ((String) message.get("user_name")).trim();
+
+                                break;
                         }
 
                     } catch (InterruptedException e) {
