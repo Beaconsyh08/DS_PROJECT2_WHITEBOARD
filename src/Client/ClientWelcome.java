@@ -6,6 +6,8 @@ import org.json.simple.parser.ParseException;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -74,6 +76,17 @@ public class ClientWelcome {
         frmWelcomePage.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frmWelcomePage.getContentPane().setLayout(null);
         frmWelcomePage.setResizable(false);
+
+        frmWelcomePage.addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent we) {
+                try {
+                    sendMsg("system", user.getUserName(), "exit");
+                    System.exit(0);
+                } catch (IOException | ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
 
 //        JLabel lblPort = new JLabel("PORT:");
 //        lblPort.setFont(new Font("Georgia", Font.PLAIN, 20));

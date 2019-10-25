@@ -616,7 +616,8 @@ public class Board extends JFrame {
 
                             case "serverDown":
                                 // todo tanchuang tishi server down
-                                lblDrawing.setText("gg");
+                                JOptionPane.showMessageDialog(null, "Sever is down!");
+                                System.out.println("hahaha");
                                 System.exit(0);
                                 break;
                         }
@@ -711,9 +712,10 @@ public class Board extends JFrame {
             outputToServer.writeUTF(jsonWord.toJSONString());
             outputToServer.flush();
         } catch (SocketException e) {
-            // todo tanchuang
+            // todo tanchuang>>>???
             e.printStackTrace();
             System.out.println("hahaha");
+            JOptionPane.showMessageDialog(null, "Server maybe not start");
         }
     }
 
@@ -733,7 +735,7 @@ public class Board extends JFrame {
         } catch (SocketException e) {
             // todo tanchuang
             e.printStackTrace();
-            System.out.println("hahaha");
+            JOptionPane.showMessageDialog(null, "Server maybe not start");
         }
     }
 
@@ -749,6 +751,7 @@ public class Board extends JFrame {
         } catch (SocketException e) {
             // todo tanchuang
             e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Server maybe not start");
             System.out.println("hahaha");
         }
     }
@@ -828,6 +831,7 @@ public class Board extends JFrame {
         } catch (SocketException e) {
             // todo tanchuang
             e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Server maybe not start");
             System.out.println("hahaha");
         }
 
