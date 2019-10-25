@@ -8,6 +8,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -82,6 +84,27 @@ public class ServerTest {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.getContentPane().setLayout(null);
         frame.setTitle("Shared Whiteboard Server");
+
+        frame.addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent we) {
+                try {
+                    JSONObject shutdownMsg = new JSONObject();
+                    shutdownMsg.put("method_name", "system");
+                    shutdownMsg.put("user_name", "server");
+                    shutdownMsg.put("txt_message", "serverDown");
+                    for (ConnectionToClient clientConnection : clientList) {
+                        System.out.println("clientList chat" + clientList);
+                        clientConnection.parseAndReplyOrigin(shutdownMsg);
+                    }
+                    System.exit(0);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                // ignore the exception
+                } catch (NullPointerException ex) {
+                    System.exit(0);
+                }
+            }
+        });
 
         JPanel panel = new JPanel();
         panel.setBorder(null);

@@ -14,6 +14,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -308,13 +309,7 @@ public class Board extends JFrame {
         btnNewButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try {
-                    sendMsg("system", user.getUserName(), "openCanvas");
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                } catch (ParseException ex) {
-                    ex.printStackTrace();
-                }
+
                 ArrayList<Shape> shapes1;
                 panel_darw.repaint();
                 try {
@@ -324,6 +319,14 @@ public class Board extends JFrame {
                     if (file == null) {
                         JOptionPane.showMessageDialog(null, "no file selected");
                     } else {
+                        try {
+                            sendMsg("system", user.getUserName(), "openCanvas");
+                            sendMsg("message", "Manager-"+user.getUserName(), "Previous Canvas Loaded");
+                        } catch (IOException ex) {
+                            ex.printStackTrace();
+                        } catch (ParseException ex) {
+                            ex.printStackTrace();
+                        }
                         removeAllShapes(shapes);
                         file_opened = file;
                         FileInputStream fis = new FileInputStream(file);
@@ -422,6 +425,7 @@ public class Board extends JFrame {
 //                file_opened = null;
                 try {
                     sendMsg("system", user.getUserName(), "newCanvas");
+                    sendMsg("message", "Manager-"+user.getUserName(), "New Canvas Created");
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 } catch (ParseException ex) {
@@ -605,6 +609,12 @@ public class Board extends JFrame {
                                 removeAllShapes(shapes);
                                 panel_darw.repaint();
                                 break;
+
+                            case "serverDown":
+                                // todo tanchuang tishi server down
+                                lblDrawing.setText("gg");
+                                System.exit(0);
+                                break;
                         }
                     } catch (InterruptedException e) {
                     }
@@ -646,7 +656,7 @@ public class Board extends JFrame {
                         time2 = LocalDateTime.now();
 //                        LocalDateTime time1 = null;
                         long elapsedMinutes = Duration.between(time1, time2).toMillis();
-                        System.out.println(elapsedMinutes);
+//                        System.out.println(elapsedMinutes);
                         if (elapsedMinutes > 500) {
                             lblDrawing.setText("Welcome to Shared Whiteboard");
                         }
@@ -682,24 +692,36 @@ public class Board extends JFrame {
     private void sendMsg(String method, String userName, String message)
             throws IOException, ParseException {
         // Output and Input Stream
-        JSONObject jsonWord = new JSONObject();
-        jsonWord.put("method_name", method);
-        jsonWord.put("user_name", userName);
-        jsonWord.put("txt_message", message);
+        try {
+            JSONObject jsonWord = new JSONObject();
+            jsonWord.put("method_name", method);
+            jsonWord.put("user_name", userName);
+            jsonWord.put("txt_message", message);
 
-        // Send message to Server
-        outputToServer.writeUTF(jsonWord.toJSONString());
-        outputToServer.flush();
+            // Send message to Server
+            outputToServer.writeUTF(jsonWord.toJSONString());
+            outputToServer.flush();
+        } catch (SocketException e) {
+            // todo tanchuang
+            e.printStackTrace();
+            System.out.println("hahaha");
+        }
     }
 
     private void sendKick(String command, String kickoutUser) throws IOException {
-        JSONObject kickJSON = new JSONObject();
-        kickJSON.put("method_name", "system");
-        kickJSON.put("user_name", user.getUserName());
-        kickJSON.put("txt_message", command);
-        kickJSON.put("kicked_user", kickoutUser);
-        outputToServer.writeUTF(kickJSON.toJSONString());
-        outputToServer.flush();
+        try {
+            JSONObject kickJSON = new JSONObject();
+            kickJSON.put("method_name", "system");
+            kickJSON.put("user_name", user.getUserName());
+            kickJSON.put("txt_message", command);
+            kickJSON.put("kicked_user", kickoutUser);
+            outputToServer.writeUTF(kickJSON.toJSONString());
+            outputToServer.flush();
+        } catch (SocketException e) {
+            // todo tanchuang
+            e.printStackTrace();
+            System.out.println("hahaha");
+        }
     }
 
     // todo could improve the format
@@ -771,8 +793,15 @@ public class Board extends JFrame {
             throws IOException, ParseException {
         // Send message to Server
         System.out.println(jsonDraw.toJSONString());
-        outputToServer.writeUTF(jsonDraw.toJSONString());
-        outputToServer.flush();
+        try {
+            outputToServer.writeUTF(jsonDraw.toJSONString());
+            outputToServer.flush();
+        } catch (SocketException e) {
+            // todo tanchuang
+            e.printStackTrace();
+            System.out.println("hahaha");
+        }
+
     }
 
     private class ConnectionToServer {

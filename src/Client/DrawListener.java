@@ -10,7 +10,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 
 public class DrawListener implements MouseListener, MouseMotionListener {
@@ -198,8 +198,14 @@ public class DrawListener implements MouseListener, MouseMotionListener {
             throws IOException, ParseException {
         // Send message to Server
         System.out.println(jsonDraw.toJSONString());
-        this.outputToServerDraw.writeUTF(jsonDraw.toJSONString());
-        this.outputToServerDraw.flush();
+        try {
+            this.outputToServerDraw.writeUTF(jsonDraw.toJSONString());
+            this.outputToServerDraw.flush();
+        } catch (SocketException e) {
+            // todo tanchuang
+            e.printStackTrace();
+            System.out.println("hahaha");
+        }
     }
 }
 
