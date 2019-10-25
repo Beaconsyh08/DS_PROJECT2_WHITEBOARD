@@ -75,7 +75,7 @@ public class Login {
         //        private JTextField textFieldPort;
         JTextField textFieldPort = new JTextField();
         textFieldPort.setHorizontalAlignment(SwingConstants.CENTER);
-        textFieldPort.setFont(new Font("Georgia", Font.PLAIN, 20));
+//        textFieldPort.setFont(new Font("Georgia", Font.PLAIN, 20));
         textFieldPort.setBounds(163, 154, 130, 26);
         textFieldPort.setText("Enter Port");
         textFieldPort.setForeground(Color.GRAY);
@@ -101,7 +101,7 @@ public class Login {
 
         JTextField textFieldIPAddress = new JTextField();
         textFieldIPAddress.setHorizontalAlignment(SwingConstants.CENTER);
-        textFieldIPAddress.setFont(new Font("Georgia", Font.PLAIN, 20));
+//        textFieldIPAddress.setFont(new Font("Georgia", Font.PLAIN, 20));
         textFieldIPAddress.setText("127.0.0.1");
         textFieldIPAddress.addFocusListener(new FocusAdapter() {
             @Override
@@ -209,7 +209,7 @@ public class Login {
         });
 
 
-        btnLogin.setBounds(170, 166, 117, 29);
+        btnLogin.setBounds(170, 232, 117, 29);
         frame.getContentPane().add(btnLogin);
 
         JLabel lblUsername = new JLabel("Username:");
@@ -223,7 +223,6 @@ public class Login {
         JLabel lblCanvas = new JLabel("Canvas");
         lblCanvas.setBounds(197, 27, 72, 16);
         frame.getContentPane().add(lblCanvas);
-
 
     }
 }
