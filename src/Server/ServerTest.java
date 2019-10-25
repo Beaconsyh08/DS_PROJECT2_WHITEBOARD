@@ -264,6 +264,26 @@ public class ServerTest {
                 }
             }).start();
 
+            //todo 只给来的人发
+            // login thread
+//            new Thread(() -> {
+//                try {
+//                    while (true) {
+//                        JSONObject message = new JSONObject();
+//                        message.put("status", logInStatus);
+//                        System.out.println("Message Received: " + message);
+//
+//                        for (ConnectionToClient clientConnection : clientList) {
+//                            clientConnection.parseAndReplyOrigin(message);
+//                            System.out.println(message);
+//                        }
+//
+//                    }
+//                } catch (IOException ex) {
+//                    ex.printStackTrace();
+//                }
+//            }).start();
+
             // chat message thread
             new Thread(() -> {
                 try {
@@ -380,6 +400,7 @@ public class ServerTest {
         userListJSON.put("method_name", "system");
         userListJSON.put("userList", userNameArray);
         userListJSON.put("txt_message", "update_user_list");
+        System.out.println(userListJSON);
         for (ConnectionToClient clientConnection : clientList) {
             clientConnection.parseAndReplyOrigin(userListJSON);
         }
@@ -423,23 +444,8 @@ public class ServerTest {
                                 System.out.println("raw json" + jsonObject);
                                 switch (method) {
                                     case "login":
-                                        System.out.println(jsonObject.toJSONString());
                                         LoginProcessor loginProcessor = new LoginProcessor();
-                                        int status = loginProcessor.checkLoginProcessor(jsonObject, dbUtils, socket, userNameArray);
-                                        if (status == 4 | status == 3 | status == 1) {
-                                            String username = (String) jsonObject.get("username");
-                                            ArrayList<ConnectionToClient> newClientList = new ArrayList<>();
-                                            for (ConnectionToClient clientConnection : clientList) {
-                                                if (clientConnection.getUserName().equals(username)) {
-                                                    clientConnection.setAlive(false);
-                                                }
-                                                if (clientConnection.isAlive) {
-                                                    newClientList.add(clientConnection);
-                                                }
-                                            }
-                                            clientList = newClientList;
-                                            System.out.println("connection after delete" + newClientList);
-                                        }
+                                        logInStatus = loginProcessor.checkLoginProcessor(jsonObject, dbUtils, socket, userNameArray);
                                         System.out.println(jsonObject.toJSONString());
                                         break;
                                     case "message":
@@ -492,5 +498,4 @@ public class ServerTest {
         }
 
     }
-
 }
