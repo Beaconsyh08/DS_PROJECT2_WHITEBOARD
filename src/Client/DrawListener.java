@@ -10,7 +10,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 
 public class DrawListener implements MouseListener, MouseMotionListener {
@@ -75,9 +75,9 @@ public class DrawListener implements MouseListener, MouseMotionListener {
         y1 = e.getY();
         if ("Line".equals(tool))//line
         {
-            g.drawLine(x0, y0, x1, y1);
+//            g.drawLine(x0, y0, x1, y1);
             Shape shape = new Shape("Line", x0, y0, x1, y1, g.getColor(), strokeint, "");
-            shapes.add(shape);
+//            shapes.add(shape);
             JSONObject jsondraw = shape.toJSON(userName);
             try {
                 sendCDrawMsg(jsondraw);
@@ -88,9 +88,9 @@ public class DrawListener implements MouseListener, MouseMotionListener {
             }
 
         } else if ("Rectangle".equals(tool)) {//rectangle
-            g.drawRect(Math.min(x1, x0), Math.min(y1, y0), Math.abs(x1 - x0), Math.abs(y0 - y1));
+//            g.drawRect(Math.min(x1, x0), Math.min(y1, y0), Math.abs(x1 - x0), Math.abs(y0 - y1));
             Shape shape = new Shape("Rectangle", x0, y0, x1, y1, g.getColor(), strokeint, "");
-            shapes.add(shape);
+//            shapes.add(shape);
             JSONObject jsondraw = shape.toJSON(userName);
             try {
                 sendCDrawMsg(jsondraw);
@@ -100,9 +100,9 @@ public class DrawListener implements MouseListener, MouseMotionListener {
                 ex.printStackTrace();
             }
         } else if ("Oval".equals(tool)) {//oval
-            g.drawOval(Math.min(x1, x0), Math.min(y1, y0), Math.abs(x1 - x0), Math.abs(y0 - y1));
+//            g.drawOval(Math.min(x1, x0), Math.min(y1, y0), Math.abs(x1 - x0), Math.abs(y0 - y1));
             Shape shape = new Shape("Oval", x0, y0, x1, y1, g.getColor(), strokeint, "");
-            shapes.add(shape);
+//            shapes.add(shape);
             JSONObject jsondraw = shape.toJSON(userName);
             try {
                 sendCDrawMsg(jsondraw);
@@ -113,9 +113,9 @@ public class DrawListener implements MouseListener, MouseMotionListener {
             }
         } else if (tool.equals("Circle")) {//circle
             int r = (int) Math.sqrt(Math.pow(x1 - x0, 2) + Math.pow(y1 - y0, 2));
-            g.drawOval(x0, y0, r, r);
+//            g.drawOval(x0, y0, r, r);
             Shape shape = new Shape("Circle", x0, y0, x1, y1, g.getColor(), strokeint, "");
-            shapes.add(shape);
+//            shapes.add(shape);
             JSONObject jsondraw = shape.toJSON(userName);
             try {
                 sendCDrawMsg(jsondraw);
@@ -128,9 +128,9 @@ public class DrawListener implements MouseListener, MouseMotionListener {
             String text;
             text = JOptionPane.showInputDialog("Please enter your text:");
             if (text != null) {
-                g.drawString(text, x0, y0);
+//                g.drawString(text, x0, y0);
                 Shape shape = new Shape("Text", x0, y0, x1, y1, g.getColor(), strokeint, text);//
-                shapes.add(shape);
+//                shapes.add(shape);
                 JSONObject jsondraw = shape.toJSON(userName);
                 try {
                     sendCDrawMsg(jsondraw);
@@ -149,9 +149,9 @@ public class DrawListener implements MouseListener, MouseMotionListener {
         int y = e.getY();
         //free draw
         if ("FreeDraw".equals(tool)) {
-            g.drawLine(x0, y0, x, y);
+//            g.drawLine(x0, y0, x, y);
             Shape shape = new Shape("Line", x0, y0, x, y, g.getColor(), strokeint, "");
-            shapes.add(shape);
+//            shapes.add(shape);
             JSONObject jsondraw = shape.toJSON(userName);
             try {
                 sendCDrawMsg(jsondraw);
@@ -166,9 +166,9 @@ public class DrawListener implements MouseListener, MouseMotionListener {
         //eraser
         else if ("Erase".equals(tool)) {
             g.setColor(Color.white);
-            g.drawLine(x0, y0, x, y);
+//            g.drawLine(x0, y0, x, y);
             Shape shape = new Shape("Line", x0, y0, x, y, g.getColor(), strokeint, "");
-            shapes.add(shape);
+//            shapes.add(shape);
             JSONObject jsondraw = shape.toJSON(userName);
             try {
                 sendCDrawMsg(jsondraw);
@@ -198,8 +198,14 @@ public class DrawListener implements MouseListener, MouseMotionListener {
             throws IOException, ParseException {
         // Send message to Server
         System.out.println(jsonDraw.toJSONString());
-        this.outputToServerDraw.writeUTF(jsonDraw.toJSONString());
-        this.outputToServerDraw.flush();
+        try {
+            this.outputToServerDraw.writeUTF(jsonDraw.toJSONString());
+            this.outputToServerDraw.flush();
+        } catch (SocketException e) {
+            // todo tanchuang
+            e.printStackTrace();
+            System.out.println("hahaha");
+        }
     }
 }
 

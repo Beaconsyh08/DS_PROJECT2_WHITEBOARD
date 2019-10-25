@@ -8,6 +8,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -38,6 +40,7 @@ public class ServerTest {
     private LinkedBlockingQueue<JSONObject> drawMsg;
     private ArrayList<JSONObject> canvasShapes;
     private ArrayList<String> userNameArray = new ArrayList<String>();
+    private LinkedBlockingQueue<JSONObject> initializeMsg;
 
     /**
      * Create the application.
@@ -82,6 +85,27 @@ public class ServerTest {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.getContentPane().setLayout(null);
         frame.setTitle("Shared Whiteboard Server");
+
+        frame.addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent we) {
+                try {
+                    JSONObject shutdownMsg = new JSONObject();
+                    shutdownMsg.put("method_name", "system");
+                    shutdownMsg.put("user_name", "server");
+                    shutdownMsg.put("txt_message", "serverDown");
+                    for (ConnectionToClient clientConnection : clientList) {
+                        System.out.println("clientList chat" + clientList);
+                        clientConnection.parseAndReplyOrigin(shutdownMsg);
+                    }
+                    System.exit(0);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                // ignore the exception
+                } catch (NullPointerException ex) {
+                    System.exit(0);
+                }
+            }
+        });
 
         JPanel panel = new JPanel();
         panel.setBorder(null);
@@ -249,6 +273,7 @@ public class ServerTest {
             drawMsg = new LinkedBlockingQueue<JSONObject>();
             systemMsg = new LinkedBlockingQueue<JSONObject>();
             canvasShapes = new ArrayList<JSONObject>();
+            initializeMsg = new LinkedBlockingQueue<JSONObject>();
 
             new Thread(() -> {
                 try {
@@ -322,17 +347,17 @@ public class ServerTest {
                 }
             }).start();
 
-            // system thread
+            // initialize thread
             new Thread(() -> {
                 try {
                     while (true) {
-                        JSONObject message = systemMsg.take();
+                        JSONObject message = initializeMsg.take();
                         String txtMessage = ((String) message.get("txt_message")).trim();
                         switch (txtMessage) {
                             case "fullCanvas":
                                 for (JSONObject canvasShape : canvasShapes) {
                                     JSONObject canvasShapeJSON = new JSONObject();
-                                    canvasShapeJSON.put("method_name", "system");
+                                    canvasShapeJSON.put("method_name", "initialize");
                                     canvasShapeJSON.put("shape", canvasShape);
                                     canvasShapeJSON.put("txt_message", "add_to_shapes");
                                     for (ConnectionToClient clientConnection : clientList) {
@@ -340,7 +365,25 @@ public class ServerTest {
                                     }
                                 }
                                 break;
+                        }
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
+
+            }).start();
+
+
+            // system thread
+            new Thread(() -> {
+                try {
+                    while (true) {
+                        JSONObject message = systemMsg.take();
+                        String txtMessage = ((String) message.get("txt_message")).trim();
+                        switch (txtMessage) {
                             case "regUserName":
                                 String userName = ((String) message.get("user_name")).trim();
                                 System.out.println(userName);
@@ -351,9 +394,6 @@ public class ServerTest {
 
                             case "exit":
                                 String userNameExit = ((String) message.get("user_name")).trim();
-//                                for (ConnectionToClient clientConnection : clientList) {
-//                                    if (clientConnection.)
-//                                }
                                 userNameArray.remove(userNameExit);
                                 updateConnectionList(userNameExit);
                                 sendUpdateUserList();
@@ -362,18 +402,20 @@ public class ServerTest {
                             case "kick":
                                 String userNameKick = ((String) message.get("kicked_user")).trim();
                                 // todo send kick out message to the person be kicked
-                                JSONObject kickJSON = new JSONObject();
-                                kickJSON.put("method_name", "system");
-                                kickJSON.put("txt_message", "bye");
-                                for (ConnectionToClient clientConnection : clientList) {
-                                    if (clientConnection.getUserName().equals(userNameKick)) {
-                                        clientConnection.parseAndReplyOrigin(kickJSON);
-                                        break;
+                                if (!userNameKick.equals("")) {
+                                    JSONObject kickJSON = new JSONObject();
+                                    kickJSON.put("method_name", "system");
+                                    kickJSON.put("txt_message", "bye");
+                                    for (ConnectionToClient clientConnection : clientList) {
+                                        if (clientConnection.getUserName().equals(userNameKick)) {
+                                            clientConnection.parseAndReplyOrigin(kickJSON);
+                                            break;
+                                        }
                                     }
+                                    userNameArray.remove(userNameKick);
+                                    updateConnectionList(userNameKick);
+                                    sendUpdateUserList();
                                 }
-                                userNameArray.remove(userNameKick);
-                                updateConnectionList(userNameKick);
-                                sendUpdateUserList();
                                 break;
 
                             case "finish":
@@ -384,6 +426,24 @@ public class ServerTest {
                                     clientConnection.parseAndReplyOrigin(finishJSON);
                                     userNameArray.remove(clientConnection.getUserName());
                                     updateConnectionList(clientConnection.getUserName());
+                                }
+                                synchronized (canvasShapes) {
+                                    canvasShapes.removeAll(canvasShapes);
+                                }
+                                break;
+
+                            case "newCanvas":
+                                synchronized (canvasShapes) {
+                                    canvasShapes.removeAll(canvasShapes);
+                                }
+                                for (ConnectionToClient clientConnection : clientList) {
+                                    clientConnection.parseAndReplyOrigin(message);
+                                }
+                                break;
+
+                            case "openCanvas":
+                                synchronized (canvasShapes) {
+                                    canvasShapes.removeAll(canvasShapes);
                                 }
                                 break;
                         }
@@ -419,6 +479,10 @@ public class ServerTest {
         clientList = newClientList;
         System.out.println("connection after delete" + newClientList);
     }
+
+//    private synchronized void addToShapes(ArrayList<Shape> shapes, Shape shape) {
+//        shapes.add(shape);
+//    }
 
 
     private class ConnectionToClient {
@@ -460,7 +524,13 @@ public class ServerTest {
                                         break;
                                     case "draw":
                                         drawMsg.put(jsonObject);
-                                        canvasShapes.add(jsonObject);
+                                        synchronized (canvasShapes) {
+                                            canvasShapes.add(jsonObject);
+                                        }
+                                        System.out.println(canvasShapes);
+                                        break;
+                                    case "initialize":
+                                        initializeMsg.put(jsonObject);
                                         break;
                                 }
 

@@ -8,10 +8,16 @@ import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -31,12 +37,16 @@ public class Board extends JFrame {
     private JTextArea chatWindowArea;
     private UserProfile user;
     private ConnectionToServer server;
-    private LinkedBlockingQueue<Object> chatMsg;
-    private LinkedBlockingQueue<Object> systemMsg;
-    private LinkedBlockingQueue<Object> drawMsg;
+    private LinkedBlockingQueue<JSONObject> chatMsg;
+    private LinkedBlockingQueue<JSONObject> systemMsg;
+    private LinkedBlockingQueue<JSONObject> drawMsg;
+    private LinkedBlockingQueue<JSONObject> initializeMsg;
     private ArrayList<String> userList;
     private DefaultListModel<String> userListModel = new DefaultListModel<String>();
     private JList<String> UserList = new JList<String>();
+    private JLabel lblDrawing;
+    private LocalDateTime time1 = LocalDateTime.now();
+    private LocalDateTime time2 = LocalDateTime.now();
 
 
     //initialize
@@ -51,12 +61,12 @@ public class Board extends JFrame {
 
         // set not resizable
         this.setResizable(false);
-        this.addWindowListener( new WindowAdapter() {
+        this.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent we) {
                 try {
                     sendMsg("system", user.getUserName(), "exit");
-                    if (user.isManager()){
-                        for (String user: userList){
+                    if (user.isManager()) {
+                        for (String user : userList) {
                             // todo trytry
                             sendKick("finish", user);
                         }
@@ -73,9 +83,6 @@ public class Board extends JFrame {
         } catch (InvalidPortNumberException | UnknownHostException ex) {
             txtSystemMessage.setText(ex.getMessage());
             txtSystemMessage.setForeground(Color.RED);
-            // todo
-            super.dispose();
-            this.dispose();
         }
 
 
@@ -232,12 +239,20 @@ public class Board extends JFrame {
         JButton btnKickOut = new JButton("Kick Out");
         btnKickOut.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                String kickoutUser = UserList.getSelectedValue();
-                System.out.println(kickoutUser);
-                try {
-                    sendKick("kick",kickoutUser);
-                } catch (IOException ex) {
-                    ex.printStackTrace();
+                if (UserList.isSelectionEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Please Select a User!");
+                } else {
+                    String kickoutUser = UserList.getSelectedValue();
+                    System.out.println(kickoutUser);
+                    if (kickoutUser.equals(user.getUserName())) {
+                        JOptionPane.showMessageDialog(null, "You cannot kick out the manager!");
+                    } else {
+                        try {
+                            sendKick("kick", kickoutUser);
+                        } catch (IOException ex) {
+                            ex.printStackTrace();
+                        }
+                    }
                 }
             }
         });
@@ -292,9 +307,10 @@ public class Board extends JFrame {
 
         //open
         JButton btnNewButton = new JButton("Open");
-        btnNewButton.addMouseListener(new MouseAdapter() {
+        btnNewButton.addActionListener(new ActionListener() {
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void actionPerformed(ActionEvent e) {
+
                 ArrayList<Shape> shapes1;
                 panel_darw.repaint();
                 try {
@@ -304,17 +320,34 @@ public class Board extends JFrame {
                     if (file == null) {
                         JOptionPane.showMessageDialog(null, "no file selected");
                     } else {
-                        shapes.removeAll(shapes);
+                        try {
+                            sendMsg("system", user.getUserName(), "openCanvas");
+                            sendMsg("message", "Manager-"+user.getUserName(), "Previous Canvas Loaded");
+                        } catch (IOException ex) {
+                            ex.printStackTrace();
+                        } catch (ParseException ex) {
+                            ex.printStackTrace();
+                        }
+                        removeAllShapes(shapes);
                         file_opened = file;
                         FileInputStream fis = new FileInputStream(file);
                         ObjectInputStream ois = new ObjectInputStream(fis);
                         shapes1 = (ArrayList<Shape>) ois.readObject();
                         for (int n = 0; n < shapes1.size(); n++) {
-                            shapes.add(shapes1.get(n));
+                            addToShapes(shapes, shapes1.get(n));
+                            JSONObject jsondraw = shapes1.get(n).toJSON(user.getUserName());
+                            try {
+                                sendCDrawMsg(jsondraw);
+                            } catch (IOException ex) {
+                                ex.printStackTrace();
+                            } catch (ParseException ex) {
+                                ex.printStackTrace();
+                            }
                         }
                         System.out.println(shapes.size());
                         panel_darw.repaint();
                         ois.close();
+
                     }
                 } catch (Exception e1) {
                     e1.printStackTrace();
@@ -327,9 +360,9 @@ public class Board extends JFrame {
         //save as
         JButton btnNewButton_1 = new JButton("Save as");
 
-        btnNewButton_1.addMouseListener(new MouseAdapter() {
+        btnNewButton_1.addActionListener(new ActionListener() {
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void actionPerformed(ActionEvent e) {
                 System.out.println(shapes.size());
                 JFileChooser chooser = new JFileChooser();
                 chooser.showSaveDialog(null);
@@ -354,9 +387,9 @@ public class Board extends JFrame {
 
         //save
         JButton btnNewButton_2 = new JButton("Save");
-        btnNewButton_2.addMouseListener(new MouseAdapter() {
+        btnNewButton_2.addActionListener(new ActionListener() {
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void actionPerformed(ActionEvent e) {
                 File file = null;
                 if (file_opened == null) {
                     JFileChooser chooser = new JFileChooser();
@@ -388,13 +421,34 @@ public class Board extends JFrame {
         JButton btnNewButton_3 = new JButton("New");
         btnNewButton_3.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                shapes.removeAll(shapes);
-                panel_darw.repaint();
-                file_opened = null;
+//                removeAllShapes(shapes);
+//                panel_darw.repaint();
+//                file_opened = null;
+                try {
+                    sendMsg("system", user.getUserName(), "newCanvas");
+                    sendMsg("message", "Manager-"+user.getUserName(), "New Canvas Created");
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                } catch (ParseException ex) {
+                    ex.printStackTrace();
+                }
             }
         });
         btnNewButton_3.setBounds(877, 31, 117, 29);
         paneldown.add(btnNewButton_3);
+
+        lblDrawing = new JLabel("Welcome to Shared Whiteboard");
+        lblDrawing.setFont(new Font("Georgia", Font.PLAIN, 14));
+        lblDrawing.setBounds(370, 22, 245, 15);
+        paneldown.add(lblDrawing);
+
+        if (!user.isManager()) {
+            btnKickOut.setEnabled(false);
+            btnNewButton.setEnabled(false);
+            btnNewButton_1.setEnabled(false);
+            btnNewButton_2.setEnabled(false);
+            btnNewButton_3.setEnabled(false);
+        }
 
         //final
         this.setVisible(true);
@@ -421,10 +475,11 @@ public class Board extends JFrame {
     private void clientInitialize(String ipAddress, int portNumber, Socket socket) {
 
         try {
-//            this.socket = socket;
-            chatMsg = new LinkedBlockingQueue<Object>();
-            systemMsg = new LinkedBlockingQueue<Object>();
-            drawMsg = new LinkedBlockingQueue<Object>();
+//            socket = new Socket(ipAddress, portNumber);
+            chatMsg = new LinkedBlockingQueue<JSONObject>();
+            systemMsg = new LinkedBlockingQueue<JSONObject>();
+            drawMsg = new LinkedBlockingQueue<JSONObject>();
+            initializeMsg = new LinkedBlockingQueue<JSONObject>();
             server = new ConnectionToServer(socket);
             inputFromServer = new DataInputStream(socket.getInputStream());
             outputToServer = new DataOutputStream(socket.getOutputStream());
@@ -443,17 +498,6 @@ public class Board extends JFrame {
             e.printStackTrace();
         }
 
-        // get full canvas
-        if (!user.isManager()) {
-            try {
-                sendMsg("system", user.getUserName(), "fullCanvas");
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-        }
-
         try {
             sendMsg("system", user.getUserName(), "fullUserList");
         } catch (IOException e) {
@@ -462,11 +506,22 @@ public class Board extends JFrame {
             e.printStackTrace();
         }
 
-        Thread systemHandling = new Thread() {
+        // get full canvas
+        if (!user.isManager()) {
+            try {
+                sendMsg("initialize", user.getUserName(), "fullCanvas");
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+
+        Thread initializeHandling = new Thread() {
             public void run() {
                 while (true) {
                     try {
-                        JSONObject message = (JSONObject) systemMsg.take();
+                        JSONObject message = (JSONObject) initializeMsg.take();
                         String command = ((String) message.get("txt_message")).trim();
 
                         switch (command) {
@@ -486,37 +541,45 @@ public class Board extends JFrame {
                                 switch (type) {
                                     case "Line":
                                         Shape shape = new Shape("Line", x1, y1, x2, y2, color, stroke, "");
-                                        shapes.add(shape);
+                                        addToShapes(shapes, shape);
                                         break;
                                     case "Rectangle":
                                         Shape shape2 = new Shape("Rectangle", x1, y1, x2, y2, color, stroke, "");
-                                        shapes.add(shape2);
+                                        addToShapes(shapes, shape2);
                                         break;
                                     case "Oval":
                                         Shape shape3 = new Shape("Oval", x1, y1, x2, y2, color, stroke, "");
-                                        shapes.add(shape3);
+                                        addToShapes(shapes, shape3);
                                         break;
                                     case "Circle":
                                         Shape shape4 = new Shape("Circle", x1, y1, x2, y2, color, stroke, "");
-                                        shapes.add(shape4);
+                                        addToShapes(shapes, shape4);
                                         break;
                                     case "Text":
                                         Shape shape5 = new Shape("Text", x1, y1, x2, y2, color, stroke, text);
-                                        shapes.add(shape5);
+                                        addToShapes(shapes, shape5);
                                         break;
                                 }
                                 break;
+                        }
 
-                            case "update_user_list":
-                                userList = ((ArrayList<String>) message.get("userList"));
-                                System.out.println("updated userlist " + userList);
-                                userListModel.clear();
-                                for(int i = 0; i < userList.size(); i ++) {
-                                    userListModel.addElement(userList.get(i));
-                                }
-                                UserList.setModel(userListModel);
-                                break;
+                    } catch (InterruptedException e) {
+                    }
+                }
+            }
+        };
+        initializeHandling.setDaemon(true);
+        initializeHandling.start();
 
+
+        Thread systemHandling = new Thread() {
+            public void run() {
+                while (true) {
+                    try {
+                        JSONObject message = (JSONObject) systemMsg.take();
+                        String command = ((String) message.get("txt_message")).trim();
+
+                        switch (command) {
                             case "bye":
                                 JOptionPane.showMessageDialog(null, "You have been kicked out by the manager!");
                                 System.exit(0);
@@ -526,9 +589,34 @@ public class Board extends JFrame {
                                 JOptionPane.showMessageDialog(null, "The manager has shut down the whiteboard!");
                                 System.exit(0);
                                 break;
+
+                            case "update_user_list":
+                                userList = ((ArrayList<String>) message.get("userList"));
+                                System.out.println("updated userlist " + userList);
+                                userListModel.clear();
+                                for (int i = 0; i < userList.size(); i++) {
+                                    userListModel.addElement(userList.get(i));
+                                }
+                                UserList.setModel(userListModel);
+                                break;
+
+                            case "newCanvas":
+                                removeAllShapes(shapes);
+                                panel_darw.repaint();
+                                file_opened = null;
+                                break;
+
+                            case "openCanvas":
+                                removeAllShapes(shapes);
+                                panel_darw.repaint();
+                                break;
+
+                            case "serverDown":
+                                // todo tanchuang tishi server down
+                                lblDrawing.setText("gg");
+                                System.exit(0);
+                                break;
                         }
-
-
                     } catch (InterruptedException e) {
                     }
                 }
@@ -558,10 +646,20 @@ public class Board extends JFrame {
                     if (drawMsg.size() > 0) {
                         try {
                             JSONObject message = (JSONObject) drawMsg.take();
-                            // todo add handling process
+                            String drawerName = (String) message.get("user_name");
+                            lblDrawing.setText(drawerName + " is drawing...");
                             Graphics gd = panel_darw.getGraphics();
                             parseAndDraw(message, gd);
+                            time1 = LocalDateTime.now();
                         } catch (InterruptedException e) {
+                        }
+                    } else if (drawMsg.size() == 0) {
+                        time2 = LocalDateTime.now();
+//                        LocalDateTime time1 = null;
+                        long elapsedMinutes = Duration.between(time1, time2).toMillis();
+//                        System.out.println(elapsedMinutes);
+                        if (elapsedMinutes > 500) {
+                            lblDrawing.setText("Welcome to Shared Whiteboard");
                         }
                     }
                 }
@@ -595,24 +693,36 @@ public class Board extends JFrame {
     private void sendMsg(String method, String userName, String message)
             throws IOException, ParseException {
         // Output and Input Stream
-        JSONObject jsonWord = new JSONObject();
-        jsonWord.put("method_name", method);
-        jsonWord.put("user_name", userName);
-        jsonWord.put("txt_message", message);
+        try {
+            JSONObject jsonWord = new JSONObject();
+            jsonWord.put("method_name", method);
+            jsonWord.put("user_name", userName);
+            jsonWord.put("txt_message", message);
 
-        // Send message to Server
-        outputToServer.writeUTF(jsonWord.toJSONString());
-        outputToServer.flush();
+            // Send message to Server
+            outputToServer.writeUTF(jsonWord.toJSONString());
+            outputToServer.flush();
+        } catch (SocketException e) {
+            // todo tanchuang
+            e.printStackTrace();
+            System.out.println("hahaha");
+        }
     }
 
     private void sendKick(String command, String kickoutUser) throws IOException {
-        JSONObject kickJSON = new JSONObject();
-        kickJSON.put("method_name", "system");
-        kickJSON.put("user_name", user.getUserName());
-        kickJSON.put("txt_message", command);
-        kickJSON.put("kicked_user", kickoutUser);
-        outputToServer.writeUTF(kickJSON.toJSONString());
-        outputToServer.flush();
+        try {
+            JSONObject kickJSON = new JSONObject();
+            kickJSON.put("method_name", "system");
+            kickJSON.put("user_name", user.getUserName());
+            kickJSON.put("txt_message", command);
+            kickJSON.put("kicked_user", kickoutUser);
+            outputToServer.writeUTF(kickJSON.toJSONString());
+            outputToServer.flush();
+        } catch (SocketException e) {
+            // todo tanchuang
+            e.printStackTrace();
+            System.out.println("hahaha");
+        }
     }
 
     // todo could improve the format
@@ -646,30 +756,53 @@ public class Board extends JFrame {
             case "Line":
                 g2d.drawLine(x1, y1, x2, y2);
                 Shape shape = new Shape("Line", x1, y1, x2, y2, color, strokeInt, "");
-                shapes.add(shape);
+                addToShapes(shapes, shape);
                 break;
             case "Rectangle":
                 g2d.drawRect(Math.min(x2, x1), Math.min(y2, y1), Math.abs(x2 - x1), Math.abs(y1 - y2));
                 Shape shape2 = new Shape("Rectangle", x1, y1, x2, y2, color, strokeInt, "");
-                shapes.add(shape2);
+                addToShapes(shapes, shape2);
                 break;
             case "Oval":
                 g2d.drawOval(Math.min(x2, x1), Math.min(y2, y1), Math.abs(x2 - x1), Math.abs(y1 - y2));
                 Shape shape3 = new Shape("Oval", x1, y1, x2, y2, color, strokeInt, "");
-                shapes.add(shape3);
+                addToShapes(shapes, shape3);
                 break;
             case "Circle":
                 int r = (int) Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
                 g2d.drawOval(x1, y1, r, r);
                 Shape shape4 = new Shape("Circle", x1, y1, x2, y2, color, strokeInt, "");
-                shapes.add(shape4);
+                addToShapes(shapes, shape4);
                 break;
             case "Text":
                 g2d.drawString(text, x1, y1);
                 Shape shape5 = new Shape("Text", x1, y1, x2, y2, color, strokeInt, text);
-                shapes.add(shape5);
+                addToShapes(shapes, shape5);
                 break;
         }
+    }
+
+    private synchronized void addToShapes(ArrayList<Shape> shapes, Shape shape) {
+        shapes.add(shape);
+    }
+
+    private synchronized void removeAllShapes(ArrayList<Shape> shapes) {
+        shapes.removeAll(shapes);
+    }
+
+    private void sendCDrawMsg(JSONObject jsonDraw)
+            throws IOException, ParseException {
+        // Send message to Server
+        System.out.println(jsonDraw.toJSONString());
+        try {
+            outputToServer.writeUTF(jsonDraw.toJSONString());
+            outputToServer.flush();
+        } catch (SocketException e) {
+            // todo tanchuang
+            e.printStackTrace();
+            System.out.println("hahaha");
+        }
+
     }
 
     private class ConnectionToServer {
@@ -696,6 +829,9 @@ public class Board extends JFrame {
                                         break;
                                     case "draw":
                                         drawMsg.put(jsonObject);
+                                        break;
+                                    case "initialize":
+                                        initializeMsg.put(jsonObject);
                                         break;
                                 }
                             }
