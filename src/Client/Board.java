@@ -568,10 +568,10 @@ public class Board extends JFrame {
                             case "askToJoin":
                                 JSONObject jsonJoin = (JSONObject) message.get("shape");
                                 String joiner = ((String) message.get("user_name")).trim();
-                                if (JOptionPane.showConfirmDialog(null, joiner+" want to join the board", "WARNING",
+                                if (JOptionPane.showConfirmDialog(null, joiner + " want to join the board", "WARNING",
                                         JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 //                                        sendMsg("replyJoin", user.getUserName(), "true");
-                                        sendMsg4("initialize", user.getUserName(), "replyJoin", "true");
+                                    sendMsg4("initialize", user.getUserName(), "replyJoin", "true");
                                     // yes option
                                 } else {
                                     // no option

@@ -96,9 +96,11 @@ public class ServerTest {
                     shutdownMsg.put("method_name", "system");
                     shutdownMsg.put("user_name", "server");
                     shutdownMsg.put("txt_message", "serverDown");
-                    for (ConnectionToClient clientConnection : clientList) {
-                        System.out.println("clientList chat" + clientList);
-                        clientConnection.parseAndReplyOrigin(shutdownMsg);
+                    synchronized (clientList) {
+                        for (ConnectionToClient clientConnection : clientList) {
+                            System.out.println("clientList chat" + clientList);
+                            clientConnection.parseAndReplyOrigin(shutdownMsg);
+                        }
                     }
                     System.exit(0);
                 } catch (IOException e) {
@@ -299,11 +301,11 @@ public class ServerTest {
                         JSONObject message = chatMsg.take();
 //                        System.out.println("Message Received: " + message);
                         // Do some handling here...
-                        for (ConnectionToClient clientConnection : clientList) {
-                            System.out.println("clientList chat" + clientList);
-                            clientConnection.parseAndReplyOrigin(message);
+                        synchronized (clientList) {
+                            for (ConnectionToClient clientConnection : clientList) {
+                                clientConnection.parseAndReplyOrigin(message);
+                            }
                         }
-
                     }
                 } catch (InterruptedException | IOException ex) {
                     ex.printStackTrace();
@@ -315,15 +317,11 @@ public class ServerTest {
                 try {
                     while (true) {
                         JSONObject message = drawMsg.take();
-//                        System.out.println("Message Received: " + message);
-
-                        // todo it send to everybody inclued the drawer, maybe improve? or just leave it
-                        for (ConnectionToClient clientConnection : clientList) {
-                            System.out.println("clientList draw" + clientList);
-                            clientConnection.parseAndReplyOrigin(message);
-//                            System.out.println(message);
+                        synchronized (clientList) {
+                            for (ConnectionToClient clientConnection : clientList) {
+                                clientConnection.parseAndReplyOrigin(message);
+                            }
                         }
-
                     }
                 } catch (InterruptedException | IOException ex) {
                     ex.printStackTrace();
@@ -338,13 +336,17 @@ public class ServerTest {
                         String txtMessage = ((String) message.get("txt_message")).trim();
                         switch (txtMessage) {
                             case "fullCanvas":
-                                for (JSONObject canvasShape : canvasShapes) {
-                                    JSONObject canvasShapeJSON = new JSONObject();
-                                    canvasShapeJSON.put("method_name", "initialize");
-                                    canvasShapeJSON.put("shape", canvasShape);
-                                    canvasShapeJSON.put("txt_message", "add_to_shapes");
-                                    for (ConnectionToClient clientConnection : clientList) {
-                                        clientConnection.parseAndReplyOrigin(canvasShapeJSON);
+                                synchronized (canvasShapes) {
+                                    for (JSONObject canvasShape : canvasShapes) {
+                                        JSONObject canvasShapeJSON = new JSONObject();
+                                        canvasShapeJSON.put("method_name", "initialize");
+                                        canvasShapeJSON.put("shape", canvasShape);
+                                        canvasShapeJSON.put("txt_message", "add_to_shapes");
+                                        synchronized (clientList) {
+                                            for (ConnectionToClient clientConnection : clientList) {
+                                                clientConnection.parseAndReplyOrigin(canvasShapeJSON);
+                                            }
+                                        }
                                     }
                                 }
                                 break;
@@ -356,10 +358,12 @@ public class ServerTest {
                                 jsonStatus.put("method_name", "createBoard");
                                 jsonStatus.put("user_name", manager);
                                 jsonStatus.put("txt_message", isCreatedStr);
-                                for (ConnectionToClient clientConnection : clientList) {
-                                    if (clientConnection.getUserName().equals(userName)) {
-                                        clientConnection.parseAndReplyOrigin(jsonStatus);
-                                        break;
+                                synchronized (clientList) {
+                                    for (ConnectionToClient clientConnection : clientList) {
+                                        if (clientConnection.getUserName().equals(userName)) {
+                                            clientConnection.parseAndReplyOrigin(jsonStatus);
+                                            break;
+                                        }
                                     }
                                 }
                                 if (!isCreated) {
@@ -376,10 +380,12 @@ public class ServerTest {
                                 jsonStatus2.put("user_name", manager);
                                 jsonStatus2.put("txt_message", isCreatedStr2);
                                 if (isCreated == false) {
-                                    for (ConnectionToClient clientConnection : clientList) {
-                                        if (clientConnection.getUserName().equals(userName2)) {
-                                            clientConnection.parseAndReplyOrigin(jsonStatus2);
-                                            break;
+                                    synchronized (clientList) {
+                                        for (ConnectionToClient clientConnection : clientList) {
+                                            if (clientConnection.getUserName().equals(userName2)) {
+                                                clientConnection.parseAndReplyOrigin(jsonStatus2);
+                                                break;
+                                            }
                                         }
                                     }
                                 } else {
@@ -387,10 +393,12 @@ public class ServerTest {
                                     jsonStatus3.put("method_name", "initialize");
                                     jsonStatus3.put("user_name", userName2);
                                     jsonStatus3.put("txt_message", "askToJoin");
-                                    for (ConnectionToClient clientConnection : clientList) {
-                                        if (clientConnection.getUserName().equals(manager)) {
-                                            clientConnection.parseAndReplyOrigin(jsonStatus3);
-                                            break;
+                                    synchronized (clientList) {
+                                        for (ConnectionToClient clientConnection : clientList) {
+                                            if (clientConnection.getUserName().equals(manager)) {
+                                                clientConnection.parseAndReplyOrigin(jsonStatus3);
+                                                break;
+                                            }
                                         }
                                     }
                                 }
@@ -404,10 +412,12 @@ public class ServerTest {
                                 jsonStatus4.put("user_name", userName3);
                                 jsonStatus4.put("txt_message", answer);
                                 System.out.println("replyjson" + jsonStatus4);
-                                for (ConnectionToClient clientConnection : clientList) {
-                                    if (clientConnection.getUserName().equals(userName2)) {
-                                        clientConnection.parseAndReplyOrigin(jsonStatus4);
-                                        break;
+                                synchronized (clientList) {
+                                    for (ConnectionToClient clientConnection : clientList) {
+                                        if (clientConnection.getUserName().equals(userName2)) {
+                                            clientConnection.parseAndReplyOrigin(jsonStatus4);
+                                            break;
+                                        }
                                     }
                                 }
                                 break;
@@ -431,11 +441,7 @@ public class ServerTest {
                         switch (txtMessage) {
                             case "regUserName":
                                 String userName = ((String) message.get("user_name")).trim();
-                                System.out.println(userName);
-                                synchronized (userNameArray) {
-                                    userNameArray.add(userName);
-                                }
-                                System.out.println(userNameArray);
+                                userNameArrayAdd(userName);
 //                                sendUpdateUserList();
                                 String isManager = ((String) message.get("other")).trim();
                                 if (isManager.equals("true") || (isManager.equals("True"))) {
@@ -456,10 +462,8 @@ public class ServerTest {
 
                             case "exit":
                                 String userNameExit = ((String) message.get("user_name")).trim();
-                                System.out.println(clientList);
-                                System.out.println(userNameArray);
                                 updateConnectionList(userNameExit);
-                                userNameArray.remove(userNameExit);
+                                userNameArrayDel(userNameExit);
                                 sendUpdateUserList();
                                 break;
 
@@ -470,47 +474,47 @@ public class ServerTest {
                                     JSONObject kickJSON = new JSONObject();
                                     kickJSON.put("method_name", "system");
                                     kickJSON.put("txt_message", "bye");
-                                    for (ConnectionToClient clientConnection : clientList) {
-                                        if (clientConnection.getUserName().equals(userNameKick)) {
-                                            clientConnection.parseAndReplyOrigin(kickJSON);
-                                            break;
+                                    synchronized (clientList) {
+                                        for (ConnectionToClient clientConnection : clientList) {
+                                            if (clientConnection.getUserName().equals(userNameKick)) {
+                                                clientConnection.parseAndReplyOrigin(kickJSON);
+                                                break;
+                                            }
                                         }
                                     }
                                     updateConnectionList(userNameKick);
-                                    userNameArray.remove(userNameKick);
+                                    userNameArrayDel(userNameKick);
                                     sendUpdateUserList();
                                 }
                                 break;
 
                             case "finish":
                                 isCreated = false;
-                                manager ="";
+                                manager = "";
                                 JSONObject finishJSON = new JSONObject();
                                 finishJSON.put("method_name", "system");
                                 finishJSON.put("txt_message", "finish");
-                                for (ConnectionToClient clientConnection : clientList) {
-                                    clientConnection.parseAndReplyOrigin(finishJSON);
-                                    updateConnectionList(clientConnection.getUserName());
-                                    userNameArray.remove(clientConnection.getUserName());
+                                synchronized (clientList) {
+                                    for (ConnectionToClient clientConnection : clientList) {
+                                        clientConnection.parseAndReplyOrigin(finishJSON);
+                                        updateConnectionList(clientConnection.getUserName());
+                                        userNameArrayDel(clientConnection.getUserName());
+                                    }
                                 }
-                                synchronized (canvasShapes) {
-                                    canvasShapes.removeAll(canvasShapes);
-                                }
+                                canvasRemoveAll();
                                 break;
 
                             case "newCanvas":
-                                synchronized (canvasShapes) {
-                                    canvasShapes.removeAll(canvasShapes);
-                                }
-                                for (ConnectionToClient clientConnection : clientList) {
-                                    clientConnection.parseAndReplyOrigin(message);
+                                canvasRemoveAll();
+                                synchronized (clientList) {
+                                    for (ConnectionToClient clientConnection : clientList) {
+                                        clientConnection.parseAndReplyOrigin(message);
+                                    }
                                 }
                                 break;
 
                             case "openCanvas":
-                                synchronized (canvasShapes) {
-                                    canvasShapes.removeAll(canvasShapes);
-                                }
+                                canvasRemoveAll();
                                 for (ConnectionToClient clientConnection : clientList) {
                                     clientConnection.parseAndReplyOrigin(message);
                                 }
@@ -524,18 +528,31 @@ public class ServerTest {
         }
     }
 
+    private synchronized void canvasRemoveAll(){
+        canvasShapes.removeAll(canvasShapes);
+    }
+
+    private synchronized void userNameArrayAdd(String userName){
+        userNameArray.add(userName);
+    }
+
+    private synchronized void userNameArrayDel(String userNameDel){
+        userNameArray.remove(userNameDel);
+    }
+
     private void sendUpdateUserList() throws IOException {
         JSONObject userListJSON = new JSONObject();
         userListJSON.put("method_name", "system");
         userListJSON.put("userList", userNameArray);
         userListJSON.put("txt_message", "update_user_list");
-        System.out.println(userListJSON);
-        for (ConnectionToClient clientConnection : clientList) {
-            clientConnection.parseAndReplyOrigin(userListJSON);
+        synchronized (clientList) {
+            for (ConnectionToClient clientConnection : clientList) {
+                clientConnection.parseAndReplyOrigin(userListJSON);
+            }
         }
     }
 
-    private void updateConnectionList(String userNameExit) {
+    private synchronized void updateConnectionList(String userNameExit) {
         ArrayList<ConnectionToClient> newClientList = new ArrayList<ConnectionToClient>();
         for (int i = clientList.size() - 1; i >= 0; i--) {
             if (clientList.get(i).getUserName().equals(userNameExit)) {
@@ -545,22 +562,12 @@ public class ServerTest {
                 newClientList.add(clientList.get(i));
             }
         }
-
-//        for (ConnectionToClient clientConnection : clientList) {
-//            if (clientConnection.getUserName().equals(userNameExit)) {
-//                clientConnection.setAlive(false);
-//            }
-//            if (clientConnection.isAlive) {
-//                newClientList.add(clientConnection);
-//            }
-//        }
         clientList = newClientList;
-        System.out.println("connection after delete" + newClientList);
     }
 
-//    private synchronized void addToShapes(ArrayList<Shape> shapes, Shape shape) {
-//        shapes.add(shape);
-//    }
+    private synchronized void addToShapes(ArrayList<Shape> shapes, Shape shape) {
+        shapes.add(shape);
+    }
 
 
     class ConnectionToClient {
@@ -605,7 +612,6 @@ public class ServerTest {
                                         synchronized (canvasShapes) {
                                             canvasShapes.add(jsonObject);
                                         }
-                                        System.out.println(canvasShapes);
                                         break;
                                     case "initialize":
                                         initializeMsg.put(jsonObject);
