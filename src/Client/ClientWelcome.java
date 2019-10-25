@@ -17,11 +17,11 @@ import java.net.Socket;
 public class ClientWelcome {
     private String userName;
     private JFrame frmWelcomePage;
-    private JTextField textFieldPort;
+//    private JTextField textFieldPort;
     private JLabel lblNewLabel;
     private JScrollPane scrollPane;
     private JTextArea txtSystemMessage;
-    private JTextField textFieldIPAddress;
+//    private JTextField textFieldIPAddress;
 //    private JLabel lblUserName;
 //    private JTextField txtUserName;
     private JButton btnCreate;
@@ -32,9 +32,9 @@ public class ClientWelcome {
      *
      * @wbp.parser.entryPoint
      */
-    public ClientWelcome(String userName, Socket socket) {
+    public ClientWelcome(String userName, Socket socket, JTextField ip, JTextField port) {
         this.userName = userName;
-        initialize(socket);
+        initialize(socket,ip,port);
         frmWelcomePage.setVisible(true);
     }
 
@@ -54,7 +54,7 @@ public class ClientWelcome {
     /**
      * Initialize the contents of the frame.
      */
-    private void initialize(Socket socket) {
+    private void initialize(Socket socket, JTextField ip, JTextField port) {
         frmWelcomePage = new JFrame();
         frmWelcomePage.setTitle("Shared Whiteboard");
         frmWelcomePage.getContentPane().setFont(new Font("Georgia", Font.PLAIN, 20));
@@ -63,61 +63,61 @@ public class ClientWelcome {
         frmWelcomePage.getContentPane().setLayout(null);
         frmWelcomePage.setResizable(false);
 
-        JLabel lblPort = new JLabel("PORT:");
-        lblPort.setFont(new Font("Georgia", Font.PLAIN, 20));
-        lblPort.setBounds(415, 260, 60, 50);
-        frmWelcomePage.getContentPane().add(lblPort);
+//        JLabel lblPort = new JLabel("PORT:");
+//        lblPort.setFont(new Font("Georgia", Font.PLAIN, 20));
+//        lblPort.setBounds(415, 260, 60, 50);
+//        frmWelcomePage.getContentPane().add(lblPort);
 
-        textFieldPort = new JTextField();
-        textFieldPort.setHorizontalAlignment(SwingConstants.CENTER);
-        textFieldPort.setFont(new Font("Georgia", Font.PLAIN, 20));
-        textFieldPort.setBounds(487, 265, 130, 40);
-        textFieldPort.setText("Enter Port");
-        textFieldPort.setForeground(Color.GRAY);
-        textFieldPort.addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                if (textFieldPort.getText().trim().equals("Enter Port")) {
-                    textFieldPort.setText("");
-                    textFieldPort.setForeground(Color.BLACK);
-                }
-            }
+//        textFieldPort = new JTextField();
+//        textFieldPort.setHorizontalAlignment(SwingConstants.CENTER);
+//        textFieldPort.setFont(new Font("Georgia", Font.PLAIN, 20));
+//        textFieldPort.setBounds(487, 265, 130, 40);
+//        textFieldPort.setText("Enter Port");
+//        textFieldPort.setForeground(Color.GRAY);
+//        textFieldPort.addFocusListener(new FocusAdapter() {
+//            @Override
+//            public void focusGained(FocusEvent e) {
+//                if (textFieldPort.getText().trim().equals("Enter Port")) {
+//                    textFieldPort.setText("");
+//                    textFieldPort.setForeground(Color.BLACK);
+//                }
+//            }
+//
+//            @Override
+//            public void focusLost(FocusEvent e) {
+//                if (textFieldPort.getText().trim().equals("")) {
+//                    textFieldPort.setText("Enter Port");
+//                    textFieldPort.setForeground(Color.GRAY);
+//                }
+//            }
+//        });
+//        frmWelcomePage.getContentPane().add(textFieldPort);
+//        textFieldPort.setColumns(10);
 
-            @Override
-            public void focusLost(FocusEvent e) {
-                if (textFieldPort.getText().trim().equals("")) {
-                    textFieldPort.setText("Enter Port");
-                    textFieldPort.setForeground(Color.GRAY);
-                }
-            }
-        });
-        frmWelcomePage.getContentPane().add(textFieldPort);
-        textFieldPort.setColumns(10);
-
-        textFieldIPAddress = new JTextField();
-        textFieldIPAddress.setHorizontalAlignment(SwingConstants.CENTER);
-        textFieldIPAddress.setFont(new Font("Georgia", Font.PLAIN, 20));
-        textFieldIPAddress.setText("127.0.0.1");
-        textFieldIPAddress.addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                if (textFieldIPAddress.getText().trim().equals("127.0.0.1")) {
-                    textFieldIPAddress.setText("");
-                    textFieldIPAddress.setForeground(Color.BLACK);
-                }
-            }
-
-            @Override
-            public void focusLost(FocusEvent e) {
-                if (textFieldIPAddress.getText().trim().equals("")) {
-                    textFieldIPAddress.setText("127.0.0.1");
-                    textFieldIPAddress.setForeground(Color.GRAY);
-                }
-            }
-        });
-        textFieldIPAddress.setBounds(224, 265, 158, 40);
-        frmWelcomePage.getContentPane().add(textFieldIPAddress);
-        textFieldIPAddress.setColumns(10);
+//        textFieldIPAddress = new JTextField();
+//        textFieldIPAddress.setHorizontalAlignment(SwingConstants.CENTER);
+//        textFieldIPAddress.setFont(new Font("Georgia", Font.PLAIN, 20));
+//        textFieldIPAddress.setText("127.0.0.1");
+//        textFieldIPAddress.addFocusListener(new FocusAdapter() {
+//            @Override
+//            public void focusGained(FocusEvent e) {
+//                if (textFieldIPAddress.getText().trim().equals("127.0.0.1")) {
+//                    textFieldIPAddress.setText("");
+//                    textFieldIPAddress.setForeground(Color.BLACK);
+//                }
+//            }
+//
+//            @Override
+//            public void focusLost(FocusEvent e) {
+//                if (textFieldIPAddress.getText().trim().equals("")) {
+//                    textFieldIPAddress.setText("127.0.0.1");
+//                    textFieldIPAddress.setForeground(Color.GRAY);
+//                }
+//            }
+//        });
+//        textFieldIPAddress.setBounds(224, 265, 158, 40);
+//        frmWelcomePage.getContentPane().add(textFieldIPAddress);
+//        textFieldIPAddress.setColumns(10);
 
         lblNewLabel = new JLabel("Welcome to the Shared Whiteboard");
         lblNewLabel.setForeground(new Color(0, 0, 102));
@@ -181,7 +181,7 @@ public class ClientWelcome {
         btnJoin.addActionListener(e -> {
 //            userName = txtUserName.getText().trim();
             UserProfile user = new UserProfile(userName, false);
-            Board boardClient = new Board(user, textFieldIPAddress, textFieldPort, txtSystemMessage, socket);
+            Board boardClient = new Board(user, ip, port, txtSystemMessage, socket);
             System.out.println("user_name:" + userName);
 
             try {
@@ -208,7 +208,8 @@ public class ClientWelcome {
         btnCreate.addActionListener(e -> {
 //            userName = txtUserName.getText().trim();
             UserProfile user = new UserProfile(userName, true);
-            Board boardClient = new Board(user, textFieldIPAddress, textFieldPort, txtSystemMessage, socket);
+            //todo here
+            Board boardClient = new Board(user, ip, port, txtSystemMessage, socket);
             System.out.println("user_name:" + userName);
 
             try {

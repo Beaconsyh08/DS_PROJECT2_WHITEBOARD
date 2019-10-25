@@ -5,10 +5,12 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import java.awt.EventQueue;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import javax.swing.*;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -70,6 +72,58 @@ public class Login {
         passArea.setBounds(163, 117, 130, 26);
         frame.getContentPane().add(passArea);
 
+        //        private JTextField textFieldPort;
+        JTextField textFieldPort = new JTextField();
+        textFieldPort.setHorizontalAlignment(SwingConstants.CENTER);
+        textFieldPort.setFont(new Font("Georgia", Font.PLAIN, 20));
+        textFieldPort.setBounds(163, 154, 130, 26);
+        textFieldPort.setText("Enter Port");
+        textFieldPort.setForeground(Color.GRAY);
+        textFieldPort.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (textFieldPort.getText().trim().equals("Enter Port")) {
+                    textFieldPort.setText("");
+                    textFieldPort.setForeground(Color.BLACK);
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (textFieldPort.getText().trim().equals("")) {
+                    textFieldPort.setText("Enter Port");
+                    textFieldPort.setForeground(Color.GRAY);
+                }
+            }
+        });
+        frame.getContentPane().add(textFieldPort);
+        textFieldPort.setColumns(10);
+
+        JTextField textFieldIPAddress = new JTextField();
+        textFieldIPAddress.setHorizontalAlignment(SwingConstants.CENTER);
+        textFieldIPAddress.setFont(new Font("Georgia", Font.PLAIN, 20));
+        textFieldIPAddress.setText("127.0.0.1");
+        textFieldIPAddress.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (textFieldIPAddress.getText().trim().equals("127.0.0.1")) {
+                    textFieldIPAddress.setText("");
+                    textFieldIPAddress.setForeground(Color.BLACK);
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (textFieldIPAddress.getText().trim().equals("")) {
+                    textFieldIPAddress.setText("127.0.0.1");
+                    textFieldIPAddress.setForeground(Color.GRAY);
+                }
+            }
+        });
+        textFieldIPAddress.setBounds(163, 191, 130, 26);
+        frame.getContentPane().add(textFieldIPAddress);
+        textFieldIPAddress.setColumns(10);
+
         try {
             socket = new Socket(ipAddress, port);
         } catch (IOException e) {
@@ -110,7 +164,6 @@ public class Login {
                     y.printStackTrace();
                 }
 
-
                 Thread thread = new Thread() {
                     public void run() {
                         while (true) {
@@ -124,7 +177,7 @@ public class Login {
                                 System.out.println(status);
                                 if (status.equals(1L)) {
                                     JOptionPane.showMessageDialog(null, "Welcome, new account created");
-                                    ClientWelcome clientWelcome = new ClientWelcome(username, socket);
+                                    ClientWelcome clientWelcome = new ClientWelcome(username, socket, textFieldIPAddress, textFieldPort);
                                     frame.setVisible(false);
                                     break;
                                 } else if (status.equals(4L)) {
@@ -132,7 +185,7 @@ public class Login {
                                     System.exit(1);
                                 } else if (status.equals(2L)) {
                                     JOptionPane.showMessageDialog(null, "Welcome back!");
-                                    ClientWelcome clientWelcome = new ClientWelcome(username, socket);
+                                    ClientWelcome clientWelcome = new ClientWelcome(username, socket, textFieldIPAddress, textFieldPort);
                                     frame.setVisible(false);
                                     break;
                                 } else if (status.equals(3L)) {
@@ -170,5 +223,7 @@ public class Login {
         JLabel lblCanvas = new JLabel("Canvas");
         lblCanvas.setBounds(197, 27, 72, 16);
         frame.getContentPane().add(lblCanvas);
+
+
     }
 }
