@@ -18,7 +18,7 @@ public class LoginProcessor {
         Connection connection = dbUtils.getConnection();
 
         //check existence
-        String checkExistence = "SELECT * FROM user WHERE username" + " = " +  "'" + username + "'";
+        String checkExistence = "SELECT * FROM user WHERE username" + " = " + "'" + username + "'";
 //        String checkExistence = "SELECT * FROM user";
         PreparedStatement ptmp = connection.prepareStatement(checkExistence);
         ResultSet rs1 = ptmp.executeQuery();
@@ -52,13 +52,15 @@ public class LoginProcessor {
         int finalLogInStatus = logInStatus;
         new Thread(() -> {
             try {
-                while (true) {
+                int count = 0;
+                while (count < 1) {
                     JSONObject message = new JSONObject();
                     message.put("status", finalLogInStatus);
                     DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
                     outputStream.writeUTF(message.toJSONString());
                     outputStream.flush();
                     System.out.println("message send: " + message);
+                    count++;
                 }
             } catch (IOException ex) {
                 ex.printStackTrace();

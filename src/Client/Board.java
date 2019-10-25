@@ -72,6 +72,9 @@ public class Board extends JFrame {
         } catch (InvalidPortNumberException | UnknownHostException ex) {
             txtSystemMessage.setText(ex.getMessage());
             txtSystemMessage.setForeground(Color.RED);
+            // todo
+            super.dispose();
+            this.dispose();
         }
 
 

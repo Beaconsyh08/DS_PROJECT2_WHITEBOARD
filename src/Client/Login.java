@@ -27,7 +27,7 @@ public class Login {
 
     private Socket socket;
     private static String ipAddress = "127.0.0.1";
-    private static int port = 8888;
+    private static int port = 2019;
 
     /**
      * Launch the application.
