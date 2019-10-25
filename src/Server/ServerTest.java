@@ -84,7 +84,7 @@ public class ServerTest {
      */
     private void initialize() {
         frame = new JFrame();
-        frame.setBounds(100, 100, 720, 500);
+        frame.setBounds(100, 100, 500, 600);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.getContentPane().setLayout(null);
         frame.setTitle("Shared Whiteboard Server");

@@ -63,6 +63,10 @@ public class Board extends JFrame {
         this.setResizable(false);
         this.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent we) {
+                if(user.isManager()){
+                    JOptionPane.showMessageDialog(null,
+                            "You are the manager, the board will be closed completely.");
+                }
                 try {
                     sendMsg("system", user.getUserName(), "exit");
                     if (user.isManager()) {
