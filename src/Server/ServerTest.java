@@ -37,6 +37,7 @@ public class ServerTest {
     private LinkedBlockingQueue<JSONObject> drawMsg;
     private ArrayList<JSONObject> canvasShapes;
     private ArrayList<String> userNameArray = new ArrayList<String>();
+    private LinkedBlockingQueue<JSONObject> initializeMsg;
 
     /**
      * Create the application.
@@ -248,6 +249,7 @@ public class ServerTest {
             drawMsg = new LinkedBlockingQueue<JSONObject>();
             systemMsg = new LinkedBlockingQueue<JSONObject>();
             canvasShapes = new ArrayList<JSONObject>();
+            initializeMsg = new LinkedBlockingQueue<JSONObject>();
 
             new Thread(() -> {
                 try {
@@ -321,17 +323,17 @@ public class ServerTest {
                 }
             }).start();
 
-            // system thread
+            // initialize thread
             new Thread(() -> {
                 try {
                     while (true) {
-                        JSONObject message = systemMsg.take();
+                        JSONObject message = initializeMsg.take();
                         String txtMessage = ((String) message.get("txt_message")).trim();
                         switch (txtMessage) {
                             case "fullCanvas":
                                 for (JSONObject canvasShape : canvasShapes) {
                                     JSONObject canvasShapeJSON = new JSONObject();
-                                    canvasShapeJSON.put("method_name", "system");
+                                    canvasShapeJSON.put("method_name", "initialize");
                                     canvasShapeJSON.put("shape", canvasShape);
                                     canvasShapeJSON.put("txt_message", "add_to_shapes");
                                     for (ConnectionToClient clientConnection : clientList) {
@@ -339,7 +341,25 @@ public class ServerTest {
                                     }
                                 }
                                 break;
+                        }
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
+
+            }).start();
+
+
+            // system thread
+            new Thread(() -> {
+                try {
+                    while (true) {
+                        JSONObject message = systemMsg.take();
+                        String txtMessage = ((String) message.get("txt_message")).trim();
+                        switch (txtMessage) {
                             case "regUserName":
                                 String userName = ((String) message.get("user_name")).trim();
                                 System.out.println(userName);
@@ -350,9 +370,6 @@ public class ServerTest {
 
                             case "exit":
                                 String userNameExit = ((String) message.get("user_name")).trim();
-//                                for (ConnectionToClient clientConnection : clientList) {
-//                                    if (clientConnection.)
-//                                }
                                 userNameArray.remove(userNameExit);
                                 updateConnectionList(userNameExit);
                                 sendUpdateUserList();
@@ -361,18 +378,20 @@ public class ServerTest {
                             case "kick":
                                 String userNameKick = ((String) message.get("kicked_user")).trim();
                                 // todo send kick out message to the person be kicked
-                                JSONObject kickJSON = new JSONObject();
-                                kickJSON.put("method_name", "system");
-                                kickJSON.put("txt_message", "bye");
-                                for (ConnectionToClient clientConnection : clientList) {
-                                    if (clientConnection.getUserName().equals(userNameKick)) {
-                                        clientConnection.parseAndReplyOrigin(kickJSON);
-                                        break;
+                                if (!userNameKick.equals("")) {
+                                    JSONObject kickJSON = new JSONObject();
+                                    kickJSON.put("method_name", "system");
+                                    kickJSON.put("txt_message", "bye");
+                                    for (ConnectionToClient clientConnection : clientList) {
+                                        if (clientConnection.getUserName().equals(userNameKick)) {
+                                            clientConnection.parseAndReplyOrigin(kickJSON);
+                                            break;
+                                        }
                                     }
+                                    userNameArray.remove(userNameKick);
+                                    updateConnectionList(userNameKick);
+                                    sendUpdateUserList();
                                 }
-                                userNameArray.remove(userNameKick);
-                                updateConnectionList(userNameKick);
-                                sendUpdateUserList();
                                 break;
 
                             case "finish":
@@ -383,6 +402,21 @@ public class ServerTest {
                                     clientConnection.parseAndReplyOrigin(finishJSON);
                                     userNameArray.remove(clientConnection.getUserName());
                                     updateConnectionList(clientConnection.getUserName());
+                                }
+                                break;
+
+                            case "newCanvas":
+                                synchronized (canvasShapes) {
+                                    canvasShapes.removeAll(canvasShapes);
+                                }
+                                for (ConnectionToClient clientConnection : clientList) {
+                                    clientConnection.parseAndReplyOrigin(message);
+                                }
+                                break;
+
+                            case "openCanvas":
+                                synchronized (canvasShapes) {
+                                    canvasShapes.removeAll(canvasShapes);
                                 }
                                 break;
                         }
@@ -465,6 +499,9 @@ public class ServerTest {
                                         synchronized (canvasShapes) {
                                             canvasShapes.add(jsonObject);
                                         }
+                                        break;
+                                    case "initialize":
+                                        initializeMsg.put(jsonObject);
                                         break;
                                 }
 
