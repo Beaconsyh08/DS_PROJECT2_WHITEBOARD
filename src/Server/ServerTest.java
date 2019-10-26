@@ -44,6 +44,7 @@ public class ServerTest {
     private String manager = "";
     private boolean isCreated = false;
     private String userName2;
+    private boolean checkMG;
 
     /**
      * Create the application.
@@ -186,7 +187,7 @@ public class ServerTest {
                 setPort();
                 txtMsg.setForeground(Color.BLACK);
             } catch (InvalidPortNumberException | IOException ex) {
-                txtMsg.append(ex.getMessage());
+                txtMsg.setText(ex.getMessage());
                 txtMsg.setForeground(Color.RED);
             }
         });
@@ -202,6 +203,7 @@ public class ServerTest {
         txtMsg = new JTextArea();
         txtMsg.setEditable(false);
         txtMsg.setFont(new Font("Georgia", Font.PLAIN, 20));
+        txtMsg.setLineWrap(true);
         scrollMsg.setViewportView(txtMsg);
 
 
@@ -209,7 +211,7 @@ public class ServerTest {
 
     private void printInitialInfo() throws UnknownHostException {
         ipAddress = InetAddress.getLocalHost();
-        txtMsg.append("Dictionary Server started at " + new Date() + '\n');
+        txtMsg.append("Whiteboard Server Started at " + new Date() + '\n');
         txtMsg.append("Current IP Address : " + ipAddress.getHostAddress() + "\n");
         if (portNumber == 2019) {
             txtMsg.append("Using Default Port = " + portNumber + '\n');
@@ -496,13 +498,32 @@ public class ServerTest {
                                         clientConnection.parseAndReplyOrigin(message);
                                     }
                                 }
+                                System.out.println("newcanvas shapes:" + canvasShapes);
                                 break;
 
                             case "openCanvas":
+                                checkMG = true;
                                 canvasRemoveAll();
-                                for (ConnectionToClient clientConnection : clientList) {
-                                    clientConnection.parseAndReplyOrigin(message);
+                                synchronized (clientList) {
+                                    for (ConnectionToClient clientConnection : clientList) {
+                                        clientConnection.parseAndReplyOrigin(message);
+                                    }
                                 }
+                                System.out.println("opencanvas shapes:" + canvasShapes);
+
+//                                while (checkMG) {
+//                                    for (JSONObject canvasShape : canvasShapes) {
+//                                        String drawer = ((String) canvasShape.get("user_name")).trim();
+//                                        if (!drawer.equals(manager)) {
+//                                            canvasShapes.remove(canvasShape);
+//                                        }
+//                                    }
+//                                }
+                                System.out.println("opencanvas shapes check:" + canvasShapes);
+                                break;
+
+                            case "openCanvasFinish":
+                                checkMG = false;
                                 break;
                         }
                     }
@@ -513,15 +534,15 @@ public class ServerTest {
         }
     }
 
-    private synchronized void canvasRemoveAll(){
+    private synchronized void canvasRemoveAll() {
         canvasShapes.removeAll(canvasShapes);
     }
 
-    private synchronized void userNameArrayAdd(String userName){
+    private synchronized void userNameArrayAdd(String userName) {
         userNameArray.add(userName);
     }
 
-    private synchronized void userNameArrayDel(String userNameDel){
+    private synchronized void userNameArrayDel(String userNameDel) {
         userNameArray.remove(userNameDel);
     }
 
@@ -574,7 +595,7 @@ public class ServerTest {
                         try {
                             if (inputFromClient.available() > 0) {
                                 JSONObject jsonObject = (JSONObject) jsonParser.parse(inputFromClient.readUTF());
-                                String method = ((String) jsonObject.get("method_name")).trim().toLowerCase();
+                                String method = ((String) jsonObject.get("method_name")).trim();
                                 System.out.println("raw json" + jsonObject);
                                 switch (method) {
                                     case "login":
@@ -586,7 +607,7 @@ public class ServerTest {
                                         chatMsg.put(jsonObject);
                                         break;
                                     case "system":
-                                        if (((String) jsonObject.get("txt_message")).trim().equals("regUserName")) {
+                                        if ((((String) jsonObject.get("txt_message")).trim().equals("regUserName")) && ((getUserName() == null) || (getUserName().equals("")))) {
                                             String userNameNew = ((String) jsonObject.get("user_name")).trim();
                                             setUserName(userNameNew);
                                         }

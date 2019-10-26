@@ -13,7 +13,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Description
@@ -33,10 +32,10 @@ public class ClientWelcome {
     private DataOutputStream outputToServer;
     private DataInputStream inputFromServer;
     private JSONParser jsonParser = new JSONParser();
-    private boolean isCreatedStr ;
+    private boolean isCreatedStr;
     private UserProfile user;
-    private boolean answer ;
-    private boolean isCreatedJoin ;
+    private boolean answer;
+    private boolean isCreatedJoin;
     private boolean closeThread = true;
     private JButton btnJoin;
     private String method;
@@ -274,7 +273,7 @@ public class ClientWelcome {
     private Boolean readAndSendJSONToServer(String method, String userName, String txtMessage)
             throws IOException, ParseException {
         // Output and Input Stream
-
+        String resultStr = "";
         JSONObject jsonWord = new JSONObject();
         jsonWord.put("method_name", method);
         jsonWord.put("user_name", userName);
@@ -283,11 +282,19 @@ public class ClientWelcome {
         // Send message to Server
         outputToServer.writeUTF(jsonWord.toJSONString());
         outputToServer.flush();
-
-        // Read the feedback
         JSONParser jsonParser = new JSONParser();
-        JSONObject jsonObject = (JSONObject) jsonParser.parse(inputFromServer.readUTF());
-        String resultStr = ((String) jsonObject.get("txt_message")).trim();
+        // Read the feedback
+        while (true) {
+            JSONObject jsonObject = (JSONObject) jsonParser.parse(inputFromServer.readUTF());
+            System.out.println("heheheheheheh" + jsonObject);
+            try {
+                resultStr = ((String) jsonObject.get("txt_message")).trim();
+            } catch (NullPointerException ignored){
+            }
+            if (resultStr.equals("true") || resultStr.equals("false")) {
+                break;
+            }
+        }
         // Append to the text area
         return resultStr.equals("true");
     }

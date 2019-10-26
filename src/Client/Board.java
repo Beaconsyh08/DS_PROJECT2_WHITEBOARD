@@ -48,7 +48,7 @@ public class Board extends JFrame {
     private LocalDateTime time1 = LocalDateTime.now();
     private LocalDateTime time2 = LocalDateTime.now();
     private Thread drawHandling;
-
+    private boolean plsWait;
 
     //initialize
     public Board(UserProfile user, JTextField textFieldIPAddress, JTextField textFieldPort, JTextArea txtSystemMessage, Socket socket) {
@@ -64,7 +64,7 @@ public class Board extends JFrame {
         this.setResizable(false);
         this.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent we) {
-                if(user.isManager()){
+                if (user.isManager()) {
                     JOptionPane.showMessageDialog(null,
                             "You are the manager, the board will be closed completely.");
                 }
@@ -199,6 +199,7 @@ public class Board extends JFrame {
         chatWindowArea = new JTextArea();
         chatWindowPane.setBounds(6, 27, 198, 350);
         chatWindowArea.setLineWrap(true);
+        chatWindowArea.setEditable(false);
         panelright.add(chatWindowPane);
         chatWindowPane.setViewportView(chatWindowArea);
 
@@ -339,6 +340,8 @@ public class Board extends JFrame {
                                 ex.printStackTrace();
                             }
 //                            removeAllShapes(shapes);
+                            panel_darw.setEnabled(false);
+                            JOptionPane.showMessageDialog(null, "Previous Canvas loading");
                             file_opened = file;
                             FileInputStream fis = new FileInputStream(file);
                             ObjectInputStream ois = new ObjectInputStream(fis);
@@ -355,6 +358,14 @@ public class Board extends JFrame {
                                 }
                             }
                             System.out.println(shapes.size());
+                            panel_darw.setEnabled(true);
+                            try {
+                                sendMsg("system", user.getUserName(), "openCanvasFinish");
+                            } catch (IOException ex) {
+                                ex.printStackTrace();
+                            } catch (ParseException ex) {
+                                ex.printStackTrace();
+                            }
 //                            panel_darw.repaint();
                             ois.close();
                         }
@@ -437,7 +448,7 @@ public class Board extends JFrame {
             public void actionPerformed(ActionEvent e) {
 //                removeAllShapes(shapes);
 //                panel_darw.repaint();
-//                file_opened = null;
+                file_opened = null;
                 try {
                     sendMsg("system", user.getUserName(), "newCanvas");
                     sendMsg("message", "Manager-" + user.getUserName(), "New Canvas Created");
@@ -637,14 +648,21 @@ public class Board extends JFrame {
                             case "newCanvas":
                                 removeAllShapes(shapes);
                                 panel_darw.repaint();
-                                file_opened = null;
+//                                file_opened = null;
                                 break;
 
                             case "openCanvas":
-                                drawHandling.wait();
+//                                plsWait = true;
+//                                panel_darw.setEnabled(false);
+
+//                                sleep(1000);
                                 removeAllShapes(shapes);
+                                if (!user.isManager()) {
+                                    JOptionPane.showMessageDialog(null, "Previous Canvas loading");
+                                }
                                 panel_darw.repaint();
-                                drawHandling.notify();
+//                                panel_darw.setEnabled(true);
+//                                plsWait = false;
                                 break;
 
                             case "serverDown":
@@ -680,6 +698,10 @@ public class Board extends JFrame {
             public void run() {
 
                 while (true) {
+//                    if (plsWait) {
+//                        drawMsg.removeAll(drawMsg);
+//                    }
+//                    else
                     if (drawMsg.size() > 0) {
                         try {
                             JSONObject message = (JSONObject) drawMsg.take();
@@ -793,7 +815,7 @@ public class Board extends JFrame {
     // todo could improve the format
     // Append the result from server to the Client UI to show for user at correct place
     private void readAndAppendChatMsg(JSONObject jsonObject, JTextArea chatWindowArea) throws IOException, ParseException {
-        String method = ((String) jsonObject.get("method_name")).trim().toLowerCase();
+        String method = ((String) jsonObject.get("method_name")).trim();
         String senderName = ((String) jsonObject.get("user_name")).trim();
         String message = ((String) jsonObject.get("txt_message")).trim();
         chatWindowArea.append(senderName);
@@ -884,7 +906,7 @@ public class Board extends JFrame {
                         try {
                             if (inputFromServer.available() > 0) {
                                 JSONObject jsonObject = (JSONObject) jsonParser.parse(inputFromServer.readUTF());
-                                String method = ((String) jsonObject.get("method_name")).trim().toLowerCase();
+                                String method = ((String) jsonObject.get("method_name")).trim();
                                 System.out.println("raw json" + jsonObject);
                                 switch (method) {
                                     case "message":
