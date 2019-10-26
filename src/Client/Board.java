@@ -300,7 +300,7 @@ public class Board extends JFrame {
         Color[] colors = {Color.black, Color.blue, Color.cyan, Color.gray,
                 Color.green, Color.magenta, Color.orange, Color.pink, Color.red,
                 Color.yellow, Color.darkGray, Color.white, Color.lightGray,
-                new Color(89, 89, 94), new Color(1, 3, 14)
+                new Color(89, 89, 94), new Color(108, 21, 200)
                 , new Color(9, 83, 94)};
         for (Color c : colors) {
             JButton bt3 = new JButton();
