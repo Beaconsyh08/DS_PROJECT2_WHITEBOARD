@@ -47,6 +47,7 @@ public class Board extends JFrame {
     private JLabel lblDrawing;
     private LocalDateTime time1 = LocalDateTime.now();
     private LocalDateTime time2 = LocalDateTime.now();
+    private Thread drawHandling;
 
 
     //initialize
@@ -640,8 +641,10 @@ public class Board extends JFrame {
                                 break;
 
                             case "openCanvas":
+                                drawHandling.wait();
                                 removeAllShapes(shapes);
                                 panel_darw.repaint();
+                                drawHandling.notify();
                                 break;
 
                             case "serverDown":
@@ -673,7 +676,7 @@ public class Board extends JFrame {
         messageHandling.setDaemon(true);
         messageHandling.start();
 
-        Thread drawHandling = new Thread() {
+        drawHandling = new Thread() {
             public void run() {
 
                 while (true) {
