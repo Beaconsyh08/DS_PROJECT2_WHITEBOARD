@@ -7,7 +7,10 @@ import org.json.simple.parser.ParseException;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -123,133 +126,132 @@ public class Login {
         btnLogin.setFont(new Font("Georgia", Font.PLAIN, 20));
         btnLogin.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                try {
-                    String portStr = textFieldPort.getText();
-                    if (portStr.equals("") || (portStr.equals("Enter Port"))) {
-                        port = 2019;
-                    } else {
-                        port = Integer.parseInt(portStr);
-                    }
-                    ipAddress = textFieldIPAddress.getText();
-                    socket = new Socket(ipAddress, port);
-                } catch (IOException e2) {
-                    JOptionPane.showMessageDialog(null, "Fail: server not found.");
-                    System.exit(1);
-                    e2.printStackTrace();
-                }
-
                 String username = userArea.getText();
                 String password = String.valueOf(passArea.getPassword());
-                //check test area
+                String portStr = textFieldPort.getText();
+                String ipAddress = textFieldIPAddress.getText();
+                if (portStr.equals("") || (portStr.equals("Enter Port"))) {
+                    port = 2019;
+                } else {
+                    port = Integer.parseInt(portStr);
+                }
+
                 if (username.equals("")) {
                     JOptionPane.showMessageDialog(null, "Fail: no username entered.");
                 } else if (password.equals("")) {
                     JOptionPane.showMessageDialog(null, "Fail: no password entered.");
-                } else if (!username.equals("") && !password.equals("")) {
+                } else if (port < 1025 || port > 65536) {
+                    JOptionPane.showMessageDialog(null, "Fail: port number should in range 1025~65536.");
+                } else {
                     try {
-                        dataOutputStream = new DataOutputStream(socket.getOutputStream());
-                        JSONObject loginInfo = new JSONObject();
-                        String firstPwd = DigestUtil.digest(password, DigestUtil.SALT, DigestUtil.DIGEST_TIMES);
-                        String salt = SaltUtil.generateSalt();
-                        Integer times = SaltUtil.getEncryptTimes();
-                        String lastPwd = DigestUtil.digest(firstPwd, salt, times);
-
-                        loginInfo.put("username", username);
-                        loginInfo.put("firstPwd", firstPwd);
-                        loginInfo.put("password", lastPwd);
-                        loginInfo.put("method_name", "login");
-                        loginInfo.put("salt", salt);
-                        loginInfo.put("times", times);
-
-                        dataOutputStream.writeUTF(loginInfo.toJSONString());
-                        dataOutputStream.flush();
-
-//                    // reg name to connection
-//                    try {
-//                        sendMsg("system", username, "regUserName");
-//                    } catch (IOException e1) {
-//                        e1.printStackTrace();
-//                    } catch (ParseException e2) {
-//                        e2.printStackTrace();
-//                    }
-                    } catch (UnknownHostException x) {
-                        x.printStackTrace();
-
-                    } catch (IOException y) {
-                        y.printStackTrace();
-                    }
-                }
-
-                Thread thread = new Thread() {
-                    public void run() {
-                        while (true) {
+                        socket = new Socket(ipAddress, port);
+                        if (socket.isConnected()) {
                             try {
-                                DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
-                                JSONParser jsonParser = new JSONParser();
+                                dataOutputStream = new DataOutputStream(socket.getOutputStream());
+                                JSONObject loginInfo = new JSONObject();
+                                String firstPwd = DigestUtil.digest(password, DigestUtil.SALT, DigestUtil.DIGEST_TIMES);
+                                String salt = SaltUtil.generateSalt();
+                                Integer times = SaltUtil.getEncryptTimes();
+                                String lastPwd = DigestUtil.digest(firstPwd, salt, times);
 
-                                JSONObject tmp = (JSONObject) jsonParser.parse(dataInputStream.readUTF());
-                                Long status = (Long) tmp.get("status");
+                                loginInfo.put("username", username);
+                                loginInfo.put("firstPwd", firstPwd);
+                                loginInfo.put("password", lastPwd);
+                                loginInfo.put("method_name", "login");
+                                loginInfo.put("salt", salt);
+                                loginInfo.put("times", times);
 
-                                System.out.println("status" +status);
-                                if (status.equals(1L)) {
-                                    JOptionPane.showMessageDialog(null, "Welcome, new account created");
-                                    UserProfile user = new UserProfile(username, false);
-                                    ClientWelcome clientWelcome = new ClientWelcome(username, socket, textFieldIPAddress, textFieldPort, user);
-                                    frame.setVisible(false);
-                                    // reg name to connection
+                                dataOutputStream.writeUTF(loginInfo.toJSONString());
+                                dataOutputStream.flush();
 
-                                    try {
-                                        sendMsg4("system", user.getUserName(), "regUserName", Boolean.toString(user.isManager()));
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
-                                    } catch (ParseException e) {
-                                        e.printStackTrace();
+
+                                Thread thread = new Thread() {
+                                    public void run() {
+                                        while (true) {
+                                            try {
+                                                DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
+                                                JSONParser jsonParser = new JSONParser();
+
+                                                JSONObject tmp = (JSONObject) jsonParser.parse(dataInputStream.readUTF());
+                                                Long status = (Long) tmp.get("status");
+
+                                                System.out.println("status" + status);
+                                                if (status.equals(1L)) {
+                                                    JOptionPane.showMessageDialog(null, "Welcome, new account created");
+                                                    UserProfile user = new UserProfile(username, false);
+                                                    ClientWelcome clientWelcome = new ClientWelcome(username, socket, textFieldIPAddress, textFieldPort, user);
+                                                    frame.setVisible(false);
+                                                    // reg name to connection
+
+                                                    try {
+                                                        sendMsg4("system", user.getUserName(), "regUserName", Boolean.toString(user.isManager()));
+                                                    } catch (IOException e) {
+                                                        e.printStackTrace();
+                                                    } catch (ParseException e) {
+                                                        e.printStackTrace();
+                                                    }
+                                                    break;
+                                                } else if (status.equals(4L)) {
+                                                    JOptionPane.showMessageDialog(null, "User already logged in");
+                                                    // todo delete connection
+//                                    sendMsg("system", username, "exit");
+//                                                    System.exit(1);
+                                                } else if (status.equals(2L)) {
+                                                    JOptionPane.showMessageDialog(null, "Welcome back!");
+                                                    UserProfile user = new UserProfile(username, false);
+                                                    ClientWelcome clientWelcome = new ClientWelcome(username, socket, textFieldIPAddress, textFieldPort, user);
+                                                    frame.setVisible(false);
+                                                    // reg name to connection
+
+                                                    try {
+                                                        sendMsg4("system", user.getUserName(), "regUserName", Boolean.toString(user.isManager()));
+                                                    } catch (IOException e) {
+                                                        e.printStackTrace();
+                                                    } catch (ParseException e) {
+                                                        e.printStackTrace();
+                                                    }
+                                                    break;
+                                                } else if (status.equals(3L)) {
+                                                    JOptionPane.showMessageDialog(null, "Oops, wrong password. Or username already been registered.");
+                                                    // todo delete connection
+//                                    sendMsg("system", username, "exit");
+//                                                    System.exit(1);
+                                                    break;
+                                                } else {
+                                                    JOptionPane.showMessageDialog(null, "Unknown Error, please contact manager");
+                                                    // todo delete connection
+//                                    sendMsg("system", username, "exit");
+                                                    System.exit(1);
+                                                    break;
+                                                }
+                                            } catch (IOException | ParseException e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
                                     }
-                                    break;
-                                } else if (status.equals(4L)) {
-                                    JOptionPane.showMessageDialog(null, "User already logged in");
-                                    // todo delete connection
-//                                    sendMsg("system", username, "exit");
-                                    System.exit(1);
-                                } else if (status.equals(2L)) {
-                                    JOptionPane.showMessageDialog(null, "Welcome back!");
-                                    UserProfile user = new UserProfile(username, false);
-                                    ClientWelcome clientWelcome = new ClientWelcome(username, socket, textFieldIPAddress, textFieldPort, user);
-                                    frame.setVisible(false);
-                                    // reg name to connection
+                                };
+                                thread.setDaemon(true);
+                                thread.start();
 
-                                    try {
-                                        sendMsg4("system", user.getUserName(), "regUserName", Boolean.toString(user.isManager()));
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
-                                    } catch (ParseException e) {
-                                        e.printStackTrace();
-                                    }
-                                    break;
-                                } else if (status.equals(3L)) {
-                                    JOptionPane.showMessageDialog(null, "Oops, wrong password. Or username already been registered.");
-                                    // todo delete connection
-//                                    sendMsg("system", username, "exit");
-                                    System.exit(1);
-                                    break;
-                                } else {
-                                    JOptionPane.showMessageDialog(null, "Unknown Error, please contact manager");
-                                    // todo delete connection
-//                                    sendMsg("system", username, "exit");
-                                    System.exit(1);
-                                    break;
-                                }
-                            } catch (IOException | ParseException e) {
-                                e.printStackTrace();
+
+                            } catch (UnknownHostException x) {
+                                x.printStackTrace();
+
+                            } catch (IOException y) {
+                                y.printStackTrace();
                             }
                         }
+                    } catch (IOException e2) {
+                        JOptionPane.showMessageDialog(null, "Fail: server not found.");
+//                        System.exit(1);
+                        e2.printStackTrace();
                     }
-                };
-                thread.setDaemon(true);
-                thread.start();
+
+
+                }
+
             }
         });
-
 
 
         btnLogin.setBounds(148, 286, 117, 29);
